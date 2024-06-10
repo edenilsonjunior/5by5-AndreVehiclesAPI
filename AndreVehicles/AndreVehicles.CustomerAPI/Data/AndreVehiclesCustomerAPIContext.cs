@@ -15,5 +15,14 @@ namespace AndreVehicles.CustomerAPI.Data
         }
 
         public DbSet<Models.People.Customer> Customer { get; set; } = default!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Customer>().HasBaseType<Person>();
+            
+            modelBuilder.Entity<Customer>().ToTable("Customer");
+        }
     }
 }

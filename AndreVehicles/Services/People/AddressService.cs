@@ -56,6 +56,7 @@ public class AddressService
                 }
                 else
                 {
+                    return null;
                 }
             }
         }

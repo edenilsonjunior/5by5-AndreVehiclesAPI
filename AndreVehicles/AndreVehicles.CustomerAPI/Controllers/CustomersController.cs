@@ -1,6 +1,7 @@
 ﻿using AndreVehicles.CustomerAPI.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Models.DTO.People;
 using Models.People;
 using Services.People;
 
@@ -49,7 +50,7 @@ public class CustomersController : ControllerBase
                     return NotFound();
 
                 customer = await _context.Customer.Include(a => a.Address).Where(c => c.Document == id).FirstOrDefaultAsync();
-                return customer != null ? customer : NotFound();
+                return customer.Document != null ? customer : NotFound();
 
             case "dapper":
             case "ado":
@@ -62,8 +63,21 @@ public class CustomersController : ControllerBase
     }
 
     [HttpPost("{technology}")]
-    public async Task<ActionResult<Customer>> PostCustomer(string technology, Customer customer)
+    public async Task<ActionResult<Customer>> PostCustomer(string technology, CustomerDTO customerDTO)
     {
+        Address address = await new AddressService().GetAddressByPostalCode(customerDTO.Address);
+
+        Customer customer = new()
+        {
+            Document = customerDTO.Document,
+            Name = customerDTO.Name,
+            BirthDate = customerDTO.BirthDate,
+            Address = address,
+            Phone = customerDTO.Phone,
+            Email = customerDTO.Email,
+            Income = customerDTO.Income
+        };
+
         switch (technology)
         {
             case "entity":
@@ -73,12 +87,12 @@ public class CustomersController : ControllerBase
                 _context.Customer.Add(customer);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction("GetCustomer", new { id = customer.Document }, customer);
+                return CreatedAtAction("GetCustomer", new { technology, id = customer.Document }, customer);
 
             case "dapper":
             case "ado":
                 bool success = _service.Post(technology, customer);
-                return success ? CreatedAtAction("GetCustomer", new { id = customer.Document }, customer) : BadRequest();
+                return success ? CreatedAtAction("GetCustomer", new { technology, id = customer.Document }, customer) : BadRequest("Failed to insert customer.");
 
             default:
                 return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");

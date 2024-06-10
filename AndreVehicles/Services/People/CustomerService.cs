@@ -6,11 +6,12 @@ namespace Services.People;
 public class CustomerService
 {
     private CustomerRepository _customerRepository;
-
+    private AddressRepository _addressRepository;
 
     public CustomerService()
     {
         _customerRepository = new CustomerRepository();
+        _addressRepository = new AddressRepository();
     }
 
 
@@ -28,6 +29,8 @@ public class CustomerService
 
     public bool Post(string technology, Customer customer)
     {
+        customer.Address.Id = _addressRepository.Post(technology, customer.Address);
+
         return _customerRepository.Post(technology, customer);
     }
 

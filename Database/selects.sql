@@ -1,6 +1,18 @@
 use DBAndreVehicles;
+select * from Address;
+select * from Person;
+select * from Customer;
 
-select * from Car;
+
+
+use DBAndreVehiclesAPI;
+select * from Address;
+select * from Person;
+select * from Customer;
+
+
+
+
 select * from Operation;
 select * from CarOperation;
 select * from Purchase;

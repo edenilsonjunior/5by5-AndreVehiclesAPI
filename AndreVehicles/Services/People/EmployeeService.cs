@@ -6,13 +6,14 @@ namespace Services.People;
 public class EmployeeService
 {
     private EmployeeRepository _employeeRepository;
+    private AddressRepository _addressRepository;
 
 
     public EmployeeService()
     {
         _employeeRepository = new EmployeeRepository();
+        _addressRepository = new AddressRepository();
     }
-
 
     public List<Employee> Get(string technology)
     {
@@ -28,7 +29,7 @@ public class EmployeeService
 
     public bool Post(string technology, Employee employee)
     {
+        employee.Address.Id = _addressRepository.Post(technology, employee.Address);
         return _employeeRepository.Post(technology, employee);
     }
-
 }
