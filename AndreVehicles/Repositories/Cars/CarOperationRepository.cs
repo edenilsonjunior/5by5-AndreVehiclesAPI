@@ -183,10 +183,6 @@ public class CarOperationRepository
 
     public bool Post(string technology, CarOperation carOperation)
     {
-        Console.WriteLine("Placa do carro: " + carOperation.Car.Plate);
-        Console.WriteLine("Id da operação: " + carOperation.Operation.Id);
-        Console.WriteLine("Status: " + carOperation.Status);
-
         if (technology.Equals("dapper"))
         {
             object obj = new

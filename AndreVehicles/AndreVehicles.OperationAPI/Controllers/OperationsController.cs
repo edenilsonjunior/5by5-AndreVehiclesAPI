@@ -78,8 +78,8 @@ public class OperationsController : ControllerBase
 
             case "dapper":
             case "ado":
-                bool success = _service.Post(technology, operation);
-                return success ? CreatedAtAction("GetOperation", new { id = operation.Id }, operation) : BadRequest();
+                int success = _service.Post(technology, operation);
+                return success != -1 ? CreatedAtAction("GetOperation", new { id = operation.Id }, operation) : BadRequest();
 
             default:
                 return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");

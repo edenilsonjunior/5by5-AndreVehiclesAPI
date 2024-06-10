@@ -1,4 +1,4 @@
-﻿using Services.Cars;
+﻿/*using Services.Cars;
 using Services.People;
 using Services.Sales;
 using Models.Cars;
@@ -24,8 +24,17 @@ string ado = "ado";
 Car c1 = new("AAA-0000", "carro", 2000, 2000, "vermelho", sold: false);
 Car c2 = new("AAA-0001", "carro", 2000, 2000, "branco", sold: false);
 
-Operation o1 = new("lavar carro");
-Operation o2 = new("trocar pneu");
+Operation o1 = new()
+{
+    Id = 1,
+    Description = "lavar carro"
+};
+
+Operation o2 = new()
+{
+    Id = 2,
+    Description = "trocar pneu"
+};
 
 CarOperation co1 = new(c1, o1, true);
 CarOperation co2 = new(c1, o2, true);
@@ -35,20 +44,15 @@ Purchase p2 = new(c2, 50000, DateTime.Now);
 
 // mock for Models.People
 
-var address1 = new Address("Rua das Flores", "12345-678", "Centro", "Rua", "Apto 101", 100, "SP", "São Paulo");
-var address2 = new Address("Avenida Brasil", "87654-321", "Jardim América", "Avenida", "Casa 2", 200, "RJ", "Rio de Janeiro");
+var address1 = new Address("Rua das Flores", "12345678", "Centro", "Rua", "Apto 101", 100, "SP", "São Paulo");
+var address2 = new Address("Avenida Brasil", "87654321", "Jardim América", "Avenida", "Casa 2", 200, "RJ", "Rio de Janeiro");
 
 
 var customer1 = new Customer("123.456.789-00", "João da Silva", new DateTime(1985, 5, 20), address1, "(11) 98765-4321", "joao.silva@example.com", 5000.00m);
 var customer2 = new Customer("987.654.321-00", "Maria Oliveira", new DateTime(1990, 10, 15), address2, "(21) 99876-5432", "maria.oliveira@example.com", 7500.00m);
 
-
-var role1 = new Role("Vendedor");
-var role2 = new Role("Gerente");
-
-
-var employee1 = new Employee("111.222.333-44", "Carlos Almeida", new DateTime(1980, 3, 10), address1, "(11) 91234-5678", "carlos.almeida@example.com", role1, 1000.00m, 0.05m);
-var employee2 = new Employee("555.666.777-88", "Fernanda Costa", new DateTime(1975, 7, 25), address2, "(21) 92345-6789", "fernanda.costa@example.com", role2, 2000.00m, 0.10m);
+var employee1 = new Employee("111.222.333-44", "Carlos Almeida", new DateTime(1980, 3, 10), address1, "(11) 91234-5678", "carlos.almeida@example.com", new Role("Vendedor"), 1000.00m, 0.05m);
+var employee2 = new Employee("555.666.777-88", "Fernanda Costa", new DateTime(1975, 7, 25), address2, "(21) 92345-6789", "fernanda.costa@example.com", new Role("Gerente"), 2000.00m, 0.10m);
 
 
 
@@ -81,12 +85,14 @@ var sale2 = new Sale(2, customer2, employee2, c2, payment2, new DateTime(2024, 6
 
 #region "Post tests
 
-// Services.Cars
+
+Console.WriteLine("Cars");
 carService.Post(dapper, c1);
 carService.Post(ado, c2);
 
-operationService.Post(dapper, o1);
-operationService.Post(ado, o2);
+
+o1.Id = operationService.Post(dapper, o1);
+o2.Id = operationService.Post(ado, o2);
 
 carOperationService.Post(dapper, co1);
 carOperationService.Post(ado, co2);
@@ -95,23 +101,31 @@ purchaseService.Post(dapper, p1);
 purchaseService.Post(ado, p2);
 
 
-// Services.People
-addressService.Post(dapper, address1);
-addressService.Post(ado, address2);
+
+Console.WriteLine("People");
+Console.ReadLine();
+address1.Id = addressService.Post(ado, address1);
+address2.Id = addressService.Post(ado, address2);
 
 customerService.Post(dapper, customer1);
 customerService.Post(ado, customer2);
 
+
+
 employeeService.Post(dapper, employee1);
 employeeService.Post(ado, employee2);
 
-// Services.Sales
+
+
+Console.WriteLine("Sales");
+Console.ReadLine();
 paymentService.Post(dapper, payment1);
 paymentService.Post(ado, payment2);
 
 saleService.Post(dapper, sale1);
 saleService.Post(ado, sale2);
 
+Console.ReadLine();
 #endregion
 
 
@@ -235,3 +249,31 @@ foreach (var item in salesAdo)
 
 
 #endregion
+*/
+
+
+using Models.DTO.People;
+using Models.People;
+using Services.People;
+
+AddressDTO a = new();
+a.PostalCode = "14801190";
+a.AdditionalInfo = "Casa";
+a.Number = 115;
+a.StreetType = "Avenida";
+
+Address adr = await new AddressService().GetAddressByPostalCode(a);
+
+if(adr == null)
+    Console.WriteLine("Endereço não encontrado");
+else
+{
+    Console.WriteLine($"Rua: {adr.Street}");
+    Console.WriteLine($"CEP: {adr.PostalCode}");
+    Console.WriteLine($"Bairro: {adr.District}");
+    Console.WriteLine($"Tipo de rua: {adr.StreetType}");
+    Console.WriteLine($"Complemento: {adr.AdditionalInfo}");
+    Console.WriteLine($"Número: {adr.Number}");
+    Console.WriteLine($"Estado: {adr.State}");
+    Console.WriteLine($"Cidade: {adr.City}");
+}

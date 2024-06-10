@@ -3,7 +3,7 @@
 
 public class CarOperation
 {
-    public readonly static string POST = "INSERT INTO CarOperation(CarPlate, OperationId) VALUES(@CarPlate, @OperationId)";
+    public readonly static string POST = "INSERT INTO CarOperation(CarPlate, OperationId, Status) VALUES(@CarPlate, @OperationId, @Status)";
 
     public readonly static string GETALL = @"
     select 

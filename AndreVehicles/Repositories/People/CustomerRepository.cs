@@ -14,12 +14,6 @@ public class CustomerRepository
     }
 
 
-
-
-
-
-
-
     public List<Customer> Get(string technology)
     {
         if (technology.Equals("dapper"))
@@ -148,7 +142,17 @@ public class CustomerRepository
     {
         if (technology.Equals("dapper"))
         {
-            bool firstSuccess = DapperUtilsRepository<Person>.Insert(Person.INSERT, customer);
+            object person = new
+            {
+                Document = customer.Document,
+                Name = customer.Name,
+                BirthDate = customer.BirthDate,
+                AddressId = customer.Address.Id,
+                Phone = customer.Phone,
+                Email = customer.Email
+            };
+
+            bool firstSuccess = DapperUtilsRepository<Person>.Insert(Person.INSERT, person);
 
             if (firstSuccess)
             {

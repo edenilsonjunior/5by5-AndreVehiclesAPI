@@ -160,42 +160,62 @@ public class EmployeeRepository
                 Email = employee.Email
             };
 
+            bool personSuccess = DapperUtilsRepository<dynamic>.Insert(Person.INSERT, person);
+
+            if (!personSuccess)
+                return false;
+
+            employee.Role.Id = DapperUtilsRepository<dynamic>.InsertWithScalar(Role.INSERT,
+                new
+                {
+                    Description = employee.Role.Description
+                });
+
             var employeeData = new
             {
                 Document = employee.Document,
                 RoleId = employee.Role.Id,
-                ComissionValue = employee.CommissionValue,
-                Comission = employee.Commission
+                CommissionValue = employee.CommissionValue,
+                Commission = employee.Commission
             };
 
-            return DapperUtilsRepository<dynamic>.Insert(Person.INSERT, person) && DapperUtilsRepository<dynamic>.Insert(Employee.POST, employeeData);
+            return DapperUtilsRepository<dynamic>.Insert(Employee.POST, employeeData);
         }
 
         if (technology.Equals("ado"))
         {
-            SqlConnection sqlConnection = new SqlConnection(_connectionString);
+            try
+            {
+                SqlConnection sqlConnection = new SqlConnection(_connectionString);
 
-            SqlCommand sqlCommand = new SqlCommand(Person.INSERT, sqlConnection);
-            sqlCommand.Parameters.AddWithValue("@Document", employee.Document);
-            sqlCommand.Parameters.AddWithValue("@Name", employee.Name);
-            sqlCommand.Parameters.AddWithValue("@BirthDate", employee.BirthDate);
-            sqlCommand.Parameters.AddWithValue("@AddressId", employee.Address.Id);
-            sqlCommand.Parameters.AddWithValue("@Phone", employee.Phone);
-            sqlCommand.Parameters.AddWithValue("@Email", employee.Email);
+                var personCmd = new SqlCommand(Person.INSERT, sqlConnection);
+                personCmd.Parameters.AddWithValue("@Document", employee.Document);
+                personCmd.Parameters.AddWithValue("@Name", employee.Name);
+                personCmd.Parameters.AddWithValue("@BirthDate", employee.BirthDate);
+                personCmd.Parameters.AddWithValue("@AddressId", employee.Address.Id);
+                personCmd.Parameters.AddWithValue("@Phone", employee.Phone);
+                personCmd.Parameters.AddWithValue("@Email", employee.Email);
 
-            sqlConnection.Open();
+                var roleCmd = new SqlCommand(Role.INSERT, sqlConnection);
+                roleCmd.Parameters.AddWithValue("@Description", employee.Role.Description);
 
-            sqlCommand.ExecuteNonQuery();
+                sqlConnection.Open();
+                personCmd.ExecuteNonQuery();
+                employee.Role.Id = (int)roleCmd.ExecuteScalar();
 
-            sqlCommand = new SqlCommand(Employee.POST, sqlConnection);
-            sqlCommand.Parameters.AddWithValue("@Document", employee.Document);
-            sqlCommand.Parameters.AddWithValue("@RoleId", employee.Role.Id);
-            sqlCommand.Parameters.AddWithValue("@ComissionValue", employee.CommissionValue);
-            sqlCommand.Parameters.AddWithValue("@Comission", employee.Commission);
+                var employeeCmd = new SqlCommand(Employee.POST, sqlConnection);
+                employeeCmd.Parameters.AddWithValue("@Document", employee.Document);
+                employeeCmd.Parameters.AddWithValue("@RoleId", employee.Role.Id);
+                employeeCmd.Parameters.AddWithValue("@CommissionValue", employee.CommissionValue);
+                employeeCmd.Parameters.AddWithValue("@Commission", employee.Commission);
+                employeeCmd.ExecuteNonQuery();
 
-            sqlCommand.ExecuteNonQuery();
-
-            return true;
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         return false;

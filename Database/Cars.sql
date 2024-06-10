@@ -38,7 +38,6 @@ CREATE TABLE Operation(
     CONSTRAINT pk_operation PRIMARY KEY (Id)
 );
 
-
 CREATE TABLE CarOperation(
 
     Id INT IDENTITY(1,1),

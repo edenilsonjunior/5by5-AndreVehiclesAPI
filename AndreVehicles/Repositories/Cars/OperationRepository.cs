@@ -93,7 +93,7 @@ public class OperationRepository
     }
 
 
-    public bool Post(string technology, Operation operation)
+    public int Post(string technology, Operation operation)
     {
         if (technology.Equals("dapper"))
         {
@@ -102,7 +102,7 @@ public class OperationRepository
                 operation.Description
             };
 
-            return DapperUtilsRepository<Operation>.Insert(Operation.POST, obj);
+            return DapperUtilsRepository<Operation>.InsertWithScalar(Operation.POST, obj);
         }
 
         if (technology.Equals("ado"))
@@ -115,15 +115,15 @@ public class OperationRepository
                 connection.Open();
                 command.Parameters.AddWithValue("@Description", operation.Description);
 
-                return command.ExecuteNonQuery() > 0;
+                return (int)command.ExecuteScalar();
             }
             catch (Exception)
             {
-                return false;
+                return -1;
             }
         }
 
-        return false;
+        return -1;
     }
 
 }

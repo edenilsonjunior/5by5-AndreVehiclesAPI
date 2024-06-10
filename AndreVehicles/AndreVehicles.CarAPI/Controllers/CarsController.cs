@@ -41,7 +41,7 @@ public class CarsController : ControllerBase
 
 
     [HttpGet("{technology}/{plate}")] // GET: api/Cars/5
-    public async Task<ActionResult<Car>> GetCar(string technology, string id)
+    public async Task<ActionResult<Car>> GetCar(string technology, string plate)
     {
         Car? car;
 
@@ -51,14 +51,14 @@ public class CarsController : ControllerBase
                 if (_context.Car == null)
                     return NotFound();
 
-                car = await _context.Car.FindAsync(id);
+                car = await _context.Car.FindAsync(plate);
                 return car != null ? car : NotFound();
 
             case "dapper":
             case "ado":
-                car = _service.Get(technology, id);
+                car = _service.Get(technology, plate);
 
-                return car != null ? car : NotFound();
+                return car.Plate != null ? car : NotFound();
 
             default:
                 return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");
@@ -86,7 +86,7 @@ public class CarsController : ControllerBase
 
                 bool success = _service.Post(technology, car);
 
-                return success ? CreatedAtAction("GetCar", new { id = car.Plate }, car) : BadRequest();
+                return success ? CreatedAtAction("GetCar", new { technology = technology, plate = car.Plate }, car) : BadRequest();
 
             default:
                 return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");

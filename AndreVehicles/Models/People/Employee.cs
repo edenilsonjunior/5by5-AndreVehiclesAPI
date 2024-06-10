@@ -3,7 +3,7 @@
 
 public class Employee : Person
 {
-    public readonly static string POST = "INSERT INTO Employee (Document, RoleId, ComissionValue, Comission) VALUES (@Document, @RoleId, @ComissionValue, @Comission);";
+    public readonly static string POST = "INSERT INTO Employee (Document, RoleId, CommissionValue, Commission) VALUES (@Document, @RoleId, @CommissionValue, @Commission);";
     public readonly static string GETALL = @"
     SELECT 
         p.Document,
@@ -33,8 +33,7 @@ public class Employee : Person
 
     public readonly static string GET = GETALL + " WHERE p.Document = @Document;";
 
-
-    public Role Role;
+    public Role Role { get; set; }
     public decimal CommissionValue { get; set; }
     public decimal Commission { get; set; }
 

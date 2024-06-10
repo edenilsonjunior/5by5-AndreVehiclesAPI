@@ -13,11 +13,6 @@ public class AddressRepository
         _connectionString = "Data Source=127.0.0.1; Initial Catalog=DBAndreVehiclesAPI; User Id=sa; Password=SqlServer2019!; TrustServerCertificate=Yes";
     }
 
-    public int Insert(Address address) => DapperUtilsRepository<Address>.InsertWithScalar(Address.POST, address);
-
-    public List<Address> GetAll() => DapperUtilsRepository<Address>.GetAll(Address.GETALL);
-
-
     public List<Address> Get(string technology)
     {
         if (technology.Equals("dapper"))
@@ -108,19 +103,20 @@ public class AddressRepository
         return null;    
     }
 
-    public bool Post(string technology, Address address)
+    public int Post(string technology, Address address)
     {
         if (technology.Equals("dapper"))
         {
-            return DapperUtilsRepository<Address>.Insert(Address.POST, address);
+            return DapperUtilsRepository<Address>.InsertWithScalar(Address.POST, address);
         }
 
         if (technology.Equals("ado"))
         {
             try
             {
-                using SqlConnection connection = new(_connectionString);
-                using SqlCommand command = new(Address.POST, connection);
+                SqlConnection connection = new(_connectionString);
+
+                SqlCommand command = new(Address.POST, connection);
 
                 command.Parameters.AddWithValue("@Street", address.Street);
                 command.Parameters.AddWithValue("@PostalCode", address.PostalCode);
@@ -132,16 +128,16 @@ public class AddressRepository
                 command.Parameters.AddWithValue("@City", address.City);
 
                 connection.Open();
-                command.ExecuteNonQuery();
+
+                int id = (int)command.ExecuteScalar();
+
+                return id;
             }
             catch (Exception)
             {
-                return false;
+                return -1;
             }
-
-            return true;
         }
-        return false;
+        return -1;
     }
-
 }

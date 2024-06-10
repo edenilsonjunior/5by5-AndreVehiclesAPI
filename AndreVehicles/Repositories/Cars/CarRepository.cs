@@ -10,7 +10,7 @@ public class CarRepository
 
     public CarRepository()
     {
-        _connectionString = "Data Source=127.0.0.1; Initial Catalog=DBAndreVehiclesAPI; User Id=sa; Password=SqlServer2019!; TrustServerCertificate=Yes";
+        _connectionString = "Data Source=127.0.0.1; Initial Catalog=DBAndreVehicles; User Id=sa; Password=SqlServer2019!; TrustServerCertificate=Yes";
     }
 
     public List<Car> Get(string technology)
@@ -120,8 +120,8 @@ public class CarRepository
 
         if (technology.Equals("ado"))
         {
-            try
-            {
+            /*try
+            {*/
                 using SqlConnection connection = new(_connectionString);
 
                 connection.Open();
@@ -136,12 +136,12 @@ public class CarRepository
                 command.Parameters.AddWithValue("@Sold", car.Sold);
 
                 command.ExecuteNonQuery();
-            }
+        /*    }
             catch (Exception)
             {
                 return false;
             }
-
+*/
             return true;
         }
         return false;

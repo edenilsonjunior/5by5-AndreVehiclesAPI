@@ -26,7 +26,7 @@ public class OperationService
     }
 
 
-    public bool Post(string technology, Operation operation)
+    public int Post(string technology, Operation operation)
     {
         return _operationRepository.Post(technology, operation);
     }
