@@ -50,7 +50,7 @@ public class OperationsController : ControllerBase
                     return NotFound();
 
                 operation = await _context.Operation.FindAsync(id);
-                return operation != null ? operation : NotFound();
+                return operation?.Description != null ? operation : NotFound();
 
             case "dapper":
             case "ado":
@@ -62,9 +62,11 @@ public class OperationsController : ControllerBase
         }
     }
 
-    [HttpPost("{technology}")]
-    public async Task<ActionResult<Operation>> PostOperation(string technology, Operation operation)
+    [HttpPost("{technology}/{description}")]
+    public async Task<ActionResult<Operation>> PostOperation(string technology, string description)
     {
+        Operation operation = new(description);
+
         switch (technology)
         {
             case "entity":
@@ -74,12 +76,12 @@ public class OperationsController : ControllerBase
                 _context.Operation.Add(operation);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction("GetOperation", new { id = operation.Id }, operation);
+                return CreatedAtAction("GetOperation", new { technology = technology, id = operation.Id }, operation);
 
             case "dapper":
             case "ado":
                 int success = _service.Post(technology, operation);
-                return success != -1 ? CreatedAtAction("GetOperation", new { id = operation.Id }, operation) : BadRequest();
+                return success != -1 ? CreatedAtAction("GetOperation", new { technology = technology, id = operation.Id }, operation) : BadRequest();
 
             default:
                 return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");

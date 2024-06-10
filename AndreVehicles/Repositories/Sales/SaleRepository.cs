@@ -14,7 +14,7 @@ public class SaleRepository
 
     public SaleRepository()
     {
-        _connectionString = "Data Source=127.0.0.1; Initial Catalog=DBAndreVehiclesAPI; User Id=sa; Password=SqlServer2019!; TrustServerCertificate=Yes";
+        _connectionString = "Data Source=127.0.0.1; Initial Catalog=DBAndreVehicles; User Id=sa; Password=SqlServer2019!; TrustServerCertificate=Yes";
     }
 
     public bool Insert(Sale sale)

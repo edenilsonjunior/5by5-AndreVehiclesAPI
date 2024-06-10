@@ -79,7 +79,7 @@ public class CarsController : ControllerBase
                 _context.Car.Add(car);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction("GetCar", new { id = car.Plate }, car);
+                return CreatedAtAction("GetCar", new { technology = technology, id = car.Plate }, car);
 
             case "dapper":
             case "ado":
