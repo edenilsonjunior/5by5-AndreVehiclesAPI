@@ -1,6 +1,7 @@
 ﻿using AndreVehicles.EmployeeAPI.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Models.DTO.People;
 using Models.People;
 using Services.People;
 
@@ -66,8 +67,18 @@ public class EmployeesController : ControllerBase
 
 
     [HttpPost("{technology}")]
-    public async Task<ActionResult<Employee>> PostEmployee(string technology, Employee employee)
+    public async Task<ActionResult<Employee>> PostEmployee(string technology, EmployeeDTO employeeDTO)
     {
+        Address address = await new AddressService().GetAddressByPostalCode(employeeDTO.Address);
+
+        Employee employee = new()
+        {
+            Document = employeeDTO.Document,
+            Name = employeeDTO.Name,
+            BirthDate = employeeDTO.BirthDate,
+            Address = address
+        };
+
         switch (technology)
         {
             case "entity":
@@ -77,12 +88,12 @@ public class EmployeesController : ControllerBase
                 _context.Employee.Add(employee);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction("GetEmployee", new { id = employee.Document }, employee);
+                return CreatedAtAction("GetEmployee", new { technology, id = employee.Document }, employee);
 
             case "dapper":
             case "ado":
                 bool success = _service.Post(technology, employee);
-                return success ? CreatedAtAction("GetEmployee", new { id = employee.Document }, employee) : BadRequest();
+                return success ? CreatedAtAction("GetEmployee", new { technology, id = employee.Document }, employee) : BadRequest();
 
             default:
                 return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");

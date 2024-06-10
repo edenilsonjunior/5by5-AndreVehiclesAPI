@@ -20,7 +20,7 @@ public class PaymentsController : ControllerBase
     }
 
 
-    [HttpGet("{technology}")] 
+    [HttpGet("{technology}")]
     public async Task<ActionResult<IEnumerable<Payment>>> GetPayment(string technology)
     {
         switch (technology)
@@ -46,8 +46,8 @@ public class PaymentsController : ControllerBase
         }
     }
 
-    
-    [HttpGet("{technology}/{id}")] 
+
+    [HttpGet("{technology}/{id}")]
     public async Task<ActionResult<Payment>> GetPayment(string technology, int id)
     {
         Payment? payment;
@@ -70,10 +70,12 @@ public class PaymentsController : ControllerBase
         }
     }
 
-
     [HttpPost("technology")]
     public async Task<ActionResult<Payment>> PostPayment(string technology, Payment payment)
     {
+        if(payment.Pix == null && payment.BankSlip == null && payment.Card == null)
+            return BadRequest("Payment must have at least one payment method (Pix, BankSlip or Card)");
+
         switch (technology)
         {
             case "entity":
@@ -83,19 +85,18 @@ public class PaymentsController : ControllerBase
                 _context.Payment.Add(payment);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction("GetPayment", new { id = payment.Id }, payment);
+                return CreatedAtAction("GetPayment", new { technology, id = payment.Id }, payment);
 
             case "dapper":
             case "ado":
                 bool success = _service.Post(technology, payment);
 
-                return success ? CreatedAtAction("GetPayment", new { id = payment.Id }, payment) : BadRequest();
+                return success ? CreatedAtAction("GetPayment", new { technology, id = payment.Id }, payment) : BadRequest();
 
             default:
                 return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");
         }
     }
-
 
     /*
     [HttpPut("{id}")]  // PUT: api/Payments/5

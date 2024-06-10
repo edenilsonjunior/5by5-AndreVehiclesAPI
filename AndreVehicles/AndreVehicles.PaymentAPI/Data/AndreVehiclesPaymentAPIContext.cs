@@ -15,5 +15,6 @@ namespace AndreVehicles.PaymentAPI.Data
         }
 
         public DbSet<Models.Sales.Payment> Payment { get; set; } = default!;
+
     }
 }

@@ -258,9 +258,9 @@ public class PaymentRepository
 
             obj = new
             {
-                CardNumber = payment.Card.CardNumber,
-                BankSlipId = payment.BankSlip.Id,
-                PixId = payment.Pix.Id,
+                CardNumber = payment.Card?.CardNumber,
+                BankSlipId = payment.BankSlip?.Id,
+                PixId = payment.Pix?.Id,
                 PaymentDate = payment.PaymentDate
             };
 
@@ -269,60 +269,59 @@ public class PaymentRepository
 
         if (technology.Equals("ado"))
         {
-            try
+
+            using SqlConnection sqlConnection = new SqlConnection(_connectionString);
+
+            SqlCommand sqlCommand;
+
+            sqlConnection.Open();
+            if (payment.Card != null)
             {
-                SqlConnection sqlConnection = new SqlConnection(_connectionString);
+                string insertCard = "INSERT INTO Card(CardNumber, SecurityCode, ExpirationDate, CardHolderName) VALUES(@CardNumber, @SecurityCode, @ExpirationDate, @CardHolderName);";
 
-                SqlCommand sqlCommand;
-
-                if (payment.Card != null)
-                {
-                    string insertCard = "INSERT INTO Card(CardNumber, SecurityCode, ExpirationDate, CardHolderName) VALUES(@CardNumber, @SecurityCode, @ExpirationDate, @CardHolderName);";
-
-                    sqlCommand = new SqlCommand(insertCard, sqlConnection);
-                    sqlCommand.Parameters.AddWithValue("@CardNumber", payment.Card.CardNumber);
-                    sqlCommand.Parameters.AddWithValue("@SecurityCode", payment.Card.SecurityCode);
-                    sqlCommand.Parameters.AddWithValue("@ExpirationDate", payment.Card.ExpirationDate);
-                    sqlCommand.Parameters.AddWithValue("@CardHolderName", payment.Card.CardHolderName);
-                    sqlCommand.ExecuteNonQuery();
-                }
-
-
-                if (payment.Pix != null)
-                {
-                    string insertPix = "INSERT INTO Pix(Type, PixKey) VALUES(@Type, @PixKey);";
-
-                    sqlCommand = new SqlCommand(insertPix, sqlConnection);
-                    sqlCommand.Parameters.AddWithValue("@Type", payment.Pix.Type.Id);
-                    sqlCommand.Parameters.AddWithValue("@PixKey", payment.Pix.PixKey);
-                    sqlCommand.ExecuteNonQuery();
-                }
-
-                if (payment.BankSlip != null)
-                {
-                    string insertBankSlip = "INSERT INTO BankSlip(Number, DueDate) VALUES(@Number, @DueDate);";
-
-                    sqlCommand = new SqlCommand(insertBankSlip, sqlConnection);
-                    sqlCommand.Parameters.AddWithValue("@Number", payment.BankSlip.Number);
-                    sqlCommand.Parameters.AddWithValue("@DueDate", payment.BankSlip.DueDate);
-                    sqlCommand.ExecuteNonQuery();
-                }
-
-                sqlCommand = new SqlCommand(Payment.POST, sqlConnection);
+                sqlCommand = new SqlCommand(insertCard, sqlConnection);
                 sqlCommand.Parameters.AddWithValue("@CardNumber", payment.Card.CardNumber);
-                sqlCommand.Parameters.AddWithValue("@BankSlipId", payment.BankSlip.Id);
-                sqlCommand.Parameters.AddWithValue("@PixId", payment.Pix.Id);
-                sqlCommand.Parameters.AddWithValue("@PaymentDate", payment.PaymentDate);
+                sqlCommand.Parameters.AddWithValue("@SecurityCode", payment.Card.SecurityCode);
+                sqlCommand.Parameters.AddWithValue("@ExpirationDate", payment.Card.ExpirationDate);
+                sqlCommand.Parameters.AddWithValue("@CardHolderName", payment.Card.CardHolderName);
                 sqlCommand.ExecuteNonQuery();
             }
-            catch (Exception)
-            {
 
-                return false;
+
+            if (payment.Pix != null)
+            {
+                string insertPixType = "INSERT INTO PixType(Name) VALUES(@Name); SELECT CAST(SCOPE_IDENTITY() AS INT);";
+                sqlCommand = new SqlCommand(insertPixType, sqlConnection);
+                sqlCommand.Parameters.AddWithValue("@Name", payment.Pix.Type.Name);
+                payment.Pix.Type.Id = (int)sqlCommand.ExecuteScalar();
+
+                string insertPix = "INSERT INTO Pix(Type, PixKey) VALUES(@Type, @PixKey); SELECT CAST(SCOPE_IDENTITY() AS INT);";
+
+                sqlCommand = new SqlCommand(insertPix, sqlConnection);
+                sqlCommand.Parameters.AddWithValue("@Type", payment.Pix.Type.Id);
+                sqlCommand.Parameters.AddWithValue("@PixKey", payment.Pix.PixKey);
+                payment.Pix.Id = (int)sqlCommand.ExecuteScalar();
             }
+
+            if (payment.BankSlip != null)
+            {
+                string insertBankSlip = "INSERT INTO BankSlip(Number, DueDate) VALUES(@Number, @DueDate); SELECT CAST(SCOPE_IDENTITY() AS INT);";
+
+                sqlCommand = new SqlCommand(insertBankSlip, sqlConnection);
+                sqlCommand.Parameters.AddWithValue("@Number", payment.BankSlip.Number);
+                sqlCommand.Parameters.AddWithValue("@DueDate", payment.BankSlip.DueDate);
+                payment.BankSlip.Id = (int)sqlCommand.ExecuteScalar();
+            }
+
+            sqlCommand = new SqlCommand(Payment.POST, sqlConnection);
+            sqlCommand.Parameters.AddWithValue("@CardNumber", payment.Card?.CardNumber == null ? DBNull.Value : payment.Card.CardNumber);
+            sqlCommand.Parameters.AddWithValue("@BankSlipId", payment.BankSlip?.Id == null ? DBNull.Value : payment.BankSlip.Id);
+            sqlCommand.Parameters.AddWithValue("@PixId", payment.Pix?.Id == null ? DBNull.Value : payment.Pix.Id);
+            sqlCommand.Parameters.AddWithValue("@PaymentDate", payment.PaymentDate);
+            sqlCommand.ExecuteNonQuery();
+
             return true;
         }
         return false;
     }
-
 }
