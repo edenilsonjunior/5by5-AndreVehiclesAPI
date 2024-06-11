@@ -1,7 +1,11 @@
 IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'DBAndreVehicles')
     CREATE DATABASE DBAndreVehicles;
 
-USE DBAndreVehicles;
+use DBAndreVehicles;
+
+
+if exists(select * from sys.tables where name = 'Dependent')
+    DROP TABLE Dependent;
 
 if exists(select * from sys.tables where name = 'Customer')
     DROP TABLE Customer;
@@ -9,7 +13,7 @@ if exists(select * from sys.tables where name = 'Customer')
 if exists(select * from sys.tables where name = 'Employee')
     DROP TABLE Employee;
 
-if exists(select * from sys.tables where name = 'Role')
+if exists(select * from sys.tables where name = 'Role') 
     DROP TABLE Role;
 
 if exists(select * from sys.tables where name = 'Person')
@@ -17,6 +21,8 @@ if exists(select * from sys.tables where name = 'Person')
 
 if exists(select * from sys.tables where name = 'Address')
     DROP TABLE Address;
+
+
 
 
 CREATE TABLE Address(
@@ -78,4 +84,13 @@ CREATE TABLE Customer(
 
     CONSTRAINT pk_customer PRIMARY KEY (Document),
     CONSTRAINT fk_customer_person FOREIGN KEY (Document) REFERENCES Person(Document)
+);
+
+CREATE TABLE Dependent
+(
+    CustomerDocument NVARCHAR(14) NOT NULL,
+    Document NVARCHAR(14) NOT NULL,
+
+    CONSTRAINT pk_dependent PRIMARY KEY (Document),
+    CONSTRAINT fk_dependent_person FOREIGN KEY (Document) REFERENCES Person(Document)
 );

@@ -1,8 +1,7 @@
 IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'DBAndreVehicles')
     CREATE DATABASE DBAndreVehicles;
 
-USE DBAndreVehicles;
-
+use DBAndreVehicles;
 
 if exists (select * from sys.tables where name = 'Purchase')
     DROP TABLE Purchase;
@@ -15,7 +14,6 @@ if exists (select * from sys.tables where name = 'Car')
 
 if exists (select * from sys.tables where name = 'Operation')
     DROP TABLE Operation;
-
 
 CREATE TABLE Car(
 
