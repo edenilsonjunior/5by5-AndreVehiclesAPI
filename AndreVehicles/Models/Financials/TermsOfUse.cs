@@ -1,8 +1,13 @@
-﻿namespace Models.Financials;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
+
+namespace Models.Financials;
 
 public class TermsOfUse
 {
-    public int Id { get; set; }
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; }
     public string Text { get; set; }
     public int Version { get; set; }
     public DateTime RegisterDate { get; set; }
