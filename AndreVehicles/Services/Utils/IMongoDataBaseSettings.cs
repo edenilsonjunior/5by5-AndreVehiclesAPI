@@ -8,4 +8,5 @@ public interface IMongoDataBaseSettings
     
     string TermsOfUseCollectionName { get; set; }
     string TermsOfUseAcceptCollectionName { get; set; }
+    string BankCollectionName { get; set; }
 }

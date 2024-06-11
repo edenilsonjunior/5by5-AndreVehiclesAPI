@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace Models.Financials;
 
 public class Bank
 {
-    [Key]
+    [BsonId]
     public string Cnpj { get; set; }
     public string Name { get; set; }
     public DateTime FoundationDate { get; set; }
