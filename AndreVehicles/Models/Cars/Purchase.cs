@@ -16,7 +16,7 @@ public class Purchase
         FROM Car c
         JOIN Purchase p ON c.Plate = p.CarPlate";
 
-    public readonly static string GET = GETALL + " WHERE c.Plate = @Plate";
+    public readonly static string GET = GETALL + " WHERE p.Id = @Id";
 
     public int Id { get; set; }
     public Car Car { get; set; }

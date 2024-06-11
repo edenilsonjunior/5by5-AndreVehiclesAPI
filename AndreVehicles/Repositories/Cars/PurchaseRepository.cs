@@ -1,6 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Models.Cars;
-using System.Configuration;
+using System.Drawing;
 
 namespace Repositories.Cars;
 
@@ -58,20 +58,22 @@ public class PurchaseRepository
 
                 while (reader.Read())
                 {
+                    Car car = new()
+                    {
+                        Plate = reader["Plate"].ToString(),
+                        Name = reader["Name"].ToString(),
+                        YearManufacture = Convert.ToInt32(reader["YearManufacture"]),
+                        YearModel = Convert.ToInt32(reader["YearModel"]),
+                        Color = reader["Color"].ToString(),
+                        Sold = Convert.ToBoolean(reader["Sold"])
+                    };
+
                     Purchase purchase = new Purchase
                     {
-                        Id = Convert.ToInt32(reader["Id"]),
-                        Price = Convert.ToDecimal(reader["Price"]),
+                        Id = Convert.ToInt32(reader["PurchaseId"]),
+                        Price = Convert.ToDecimal(reader["PurchacePrice"]),
                         PurchaseDate = Convert.ToDateTime(reader["PurchaseDate"]),
-                        Car = 
-                        {
-                            Plate = reader["Plate"].ToString(),
-                            Name = reader["Name"].ToString(),
-                            YearManufacture = Convert.ToInt32(reader["YearManufacture"]),
-                            YearModel = Convert.ToInt32(reader["YearModel"]),
-                            Color = reader["Color"].ToString(),
-                            Sold = Convert.ToBoolean(reader["Sold"])
-                        }
+                        Car = car
                     };
 
                     list.Add(purchase);
@@ -92,7 +94,27 @@ public class PurchaseRepository
     {
         if (technology.Equals("dapper"))
         {
-            return DapperUtilsRepository<Purchase>.Get(Purchase.GET, new { Id = id });
+            var row = DapperUtilsRepository<dynamic>.Get(Purchase.GET, new { Id = id });
+
+            Car c = new()
+            {
+                Plate = row.Plate,
+                Name = row.Name,
+                YearManufacture = row.YearManufacture,
+                YearModel = row.YearModel,
+                Color = row.Color,
+                Sold = row.Sold
+            };
+
+            var p = new Purchase()
+            {
+                Id = row.PurchaseId,
+                Car = c,
+                Price = row.PurchacePrice,
+                PurchaseDate = row.PurchaseDate
+            };
+
+            return p;
         }
 
         if (technology.Equals("ado"))
@@ -110,10 +132,7 @@ public class PurchaseRepository
 
                 if (reader.Read())
                 {
-                    purchase.Id = Convert.ToInt32(reader["Id"]);
-                    purchase.Price = Convert.ToDecimal(reader["Price"]);
-                    purchase.PurchaseDate = Convert.ToDateTime(reader["PurchaseDate"]);
-                    purchase.Car = new Car
+                    Car car = new Car
                     {
                         Plate = reader["Plate"].ToString(),
                         Name = reader["Name"].ToString(),
@@ -122,14 +141,25 @@ public class PurchaseRepository
                         Color = reader["Color"].ToString(),
                         Sold = Convert.ToBoolean(reader["Sold"])
                     };
+
+                    Purchase p = new Purchase
+                    {
+                        Id = Convert.ToInt32(reader["PurchaseId"]),
+                        Price = Convert.ToDecimal(reader["PurchacePrice"]),
+                        PurchaseDate = Convert.ToDateTime(reader["PurchaseDate"]),
+                        Car = car
+                    };
+
+                    return p;
                 }
+                else
+                    return null;
             }
             catch (Exception)
             {
                 return null;
             }
 
-            return purchase;
         }
         return null;
     }

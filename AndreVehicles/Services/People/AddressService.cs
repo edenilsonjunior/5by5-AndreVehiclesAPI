@@ -81,4 +81,11 @@ public class AddressService
         };
         return address;
     }
+
+
+    public Address PostMongo(Address address)
+    {
+        return _addressRepository.PostMongo(address);
+    }
+
 }

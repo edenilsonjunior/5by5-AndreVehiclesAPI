@@ -3,7 +3,7 @@
 
 public class CarOperation
 {
-    public readonly static string POST = "INSERT INTO CarOperation(CarPlate, OperationId, Status) VALUES(@CarPlate, @OperationId, @Status)";
+    public readonly static string POST = "INSERT INTO CarOperation(CarPlate, OperationId, Status) VALUES(@CarPlate, @OperationId, @Status); SELECT CAST(SCOPE_IDENTITY() as int)";
 
     public readonly static string GETALL = @"
     select 
@@ -13,7 +13,7 @@ public class CarOperation
         c.YearModel, 
         c.Color, 
         c.Sold,
-        o.Description,
+        o.Description as OperationDescription,
         o.Id AS OperationId,
         co.Id AS CarOperationId,
         co.Status AS CarOperationStatus
@@ -21,7 +21,7 @@ public class CarOperation
     JOIN CarOperation co ON c.Plate = co.CarPlate
     JOIN Operation o ON co.OperationId = o.Id";
 
-    public readonly static string GET = GETALL + "WHERE c.Plate = @Plate";
+    public readonly static string GET = GETALL + " WHERE co.Id = @CarOperationId";
 
     public int Id { get; set; }
     public Car Car { get; set; }

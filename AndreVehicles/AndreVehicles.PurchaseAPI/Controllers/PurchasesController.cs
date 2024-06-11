@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Cars;
+using Models.DTO.Cars;
 using Services.Cars;
 
 namespace AndreVehicles.PurchaseAPI.Controllers;
@@ -12,11 +13,13 @@ public class PurchasesController : ControllerBase
 {
     private readonly AndreVehiclesPurchaseAPIContext _context;
     private readonly PurchaseService _service;
+    private readonly CarService _carService;
 
     public PurchasesController(AndreVehiclesPurchaseAPIContext context)
     {
         _context = context;
         _service = new PurchaseService();
+        _carService = new CarService();
     }
 
 
@@ -49,7 +52,7 @@ public class PurchasesController : ControllerBase
                 if (_context.Purchase == null)
                     return NotFound();
 
-                purchase = await _context.Purchase.Include(c => c.Car).FirstOrDefaultAsync();
+                purchase = await _context.Purchase.Include(p => p.Car).FirstOrDefaultAsync(p => p.Id == id);
                 return purchase != null ? purchase : NotFound();
 
             case "dapper":
@@ -64,19 +67,46 @@ public class PurchasesController : ControllerBase
 
 
     [HttpPost("{technology}")]
-    public async Task<ActionResult<Purchase>> PostPurchase(string technology, Purchase purchase)
+    public async Task<ActionResult<Purchase>> PostPurchase(string technology, PurchaseDTO purchaseDTO)
     {
+        Car car;
+        Purchase purchase;
+
         switch (technology)
         {
             case "entity":
+
+                car = await _context.Car.FindAsync(purchaseDTO.CarPlate);
+
+                if(car == null) return BadRequest("Car not found.");
+
+                purchase = new()
+                {
+                    Car = car,
+                    PurchaseDate = purchaseDTO.PurchaseDate,
+                    Price = purchaseDTO.Price
+                };
+
                 _context.Purchase.Add(purchase);
                 await _context.SaveChangesAsync();
-                return CreatedAtAction("GetPurchase", new { id = purchase.Id }, purchase);
+                return CreatedAtAction("GetPurchase", new { technology, id = purchase.Id }, purchase);
 
             case "dapper":
             case "ado":
+
+                car = _carService.Get(technology, purchaseDTO.CarPlate);
+
+                if (car == null) return BadRequest("Car not found.");
+
+                purchase = new()
+                {
+                    Car = car,
+                    PurchaseDate = purchaseDTO.PurchaseDate,
+                    Price = purchaseDTO.Price
+                };
+
                 bool success = _service.Post(technology, purchase);
-                return success ? CreatedAtAction("GetPurchase", new { id = purchase.Id }, purchase) : BadRequest();
+                return success ? CreatedAtAction("GetPurchase", new { technology, id = purchase.Id }, purchase) : BadRequest();
 
             default:
                 return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");

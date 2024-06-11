@@ -1,6 +1,9 @@
 ﻿using Microsoft.Data.SqlClient;
 using Models.People;
 using System.Configuration;
+using static Dapper.SqlMapper;
+using System.Net;
+using MongoDB.Driver;
 
 namespace Repositories.People;
 
@@ -64,7 +67,8 @@ public class AddressRepository
     {
         if (technology.Equals("dapper"))
         {
-            return DapperUtilsRepository<Address>.Get(Address.GET, new { Id = id });
+            var list = DapperUtilsRepository<Address>.Get(Address.GET, new { Id = id });
+            return list;
         }
 
         if (technology.Equals("ado"))
@@ -139,5 +143,21 @@ public class AddressRepository
             }
         }
         return -1;
+    }
+
+
+    public Address PostMongo(Address address)
+    {
+        string connectionString = "mongodb://root:Mongo%402024%23@localhost:27017/";
+        string databaseName = "DBAndreVehicles";
+        string collectionName = "Address";
+
+        var client = new MongoClient(connectionString);
+        var database = client.GetDatabase(databaseName);
+        var collection = database.GetCollection<Address>(collectionName);
+
+        collection.InsertOne(address);
+
+        return address;
     }
 }

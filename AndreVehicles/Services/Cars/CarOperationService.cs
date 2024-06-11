@@ -25,10 +25,8 @@ public class CarOperationService
     }
 
 
-    public bool Post(string technology, CarOperation carOperation)
+    public int Post(string technology, CarOperation carOperation)
     {
-
-
         return _carOperationRepository.Post(technology, carOperation);
     }
 

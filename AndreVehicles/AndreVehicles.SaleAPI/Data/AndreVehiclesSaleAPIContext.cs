@@ -15,5 +15,11 @@ namespace AndreVehicles.SaleAPI.Data
         }
 
         public DbSet<Models.Sales.Sale> Sale { get; set; } = default!;
+        public DbSet<Models.People.Customer> Customer { get; set; } = default!;
+        public DbSet<Models.People.Employee> Employee { get; set; } = default!;
+        public DbSet<Models.Cars.Car> Car { get; set; } = default!;
+        public DbSet<Models.Sales.Payment> Payment { get; set; } = default!;
+
     }
 }
+

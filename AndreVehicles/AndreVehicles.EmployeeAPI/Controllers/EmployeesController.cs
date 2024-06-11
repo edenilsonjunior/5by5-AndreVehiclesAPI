@@ -28,7 +28,7 @@ public class EmployeesController : ControllerBase
         switch (technology)
         {
             case "entity":
-                return _context.Employee == null ? NotFound() : await _context.Employee.ToListAsync();
+                return _context.Employee == null ? NotFound() : await _context.Employee.Include(e => e.Role).Include(e => e.Address).ToListAsync();
 
             case "dapper":
             case "ado":
@@ -52,7 +52,7 @@ public class EmployeesController : ControllerBase
                 if (_context.Employee == null)
                     return NotFound();
 
-                employee = await _context.Employee.FindAsync(id);
+                employee = await _context.Employee.Include(e => e.Role).Include(e => e.Address).FirstOrDefaultAsync(e => e.Document == id);
                 return employee != null ? employee : NotFound();
 
             case "dapper":
@@ -76,8 +76,20 @@ public class EmployeesController : ControllerBase
             Document = employeeDTO.Document,
             Name = employeeDTO.Name,
             BirthDate = employeeDTO.BirthDate,
-            Address = address
+            Address = address,
+            Phone = employeeDTO.Phone,
+            Email = employeeDTO.Email,
+            CommissionValue = employeeDTO.CommissionValue,
+            Commission = employeeDTO.Commission,
+            Role = new Role
+            {
+                Description = employeeDTO.Role.Description
+            }
         };
+
+        if (new AddressService().PostMongo(address) == null)
+            return BadRequest("Failed to save address in MongoDB.");
+
 
         switch (technology)
         {

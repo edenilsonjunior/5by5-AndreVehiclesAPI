@@ -12,6 +12,7 @@ public class Customer : Person
         p.BirthDate,
         p.Phone,
         p.Email,
+        a.Id,
         a.Street,
         a.PostalCode,
         a.District,

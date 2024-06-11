@@ -1,4 +1,5 @@
-﻿using System.Net.NetworkInformation;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Models.People;
 
@@ -11,6 +12,9 @@ public class Address
 
     public readonly static string GET = GETALL + " WHERE Id = @Id";
 
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string _id { get; set; }
     public int Id { get; set; }
     public string Street { get; set; }
     public string PostalCode { get; set; }

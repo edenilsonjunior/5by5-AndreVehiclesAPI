@@ -14,6 +14,8 @@ namespace AndreVehicles.CarOperationAPI.Data
         {
         }
 
+        public DbSet<Models.Cars.Car> Car { get; set; } = default!;
+        public DbSet<Models.Cars.Operation> Operation { get; set; } = default!;
         public DbSet<Models.Cars.CarOperation> CarOperation { get; set; } = default!;
     }
 }

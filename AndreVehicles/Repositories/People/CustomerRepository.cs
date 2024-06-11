@@ -23,6 +23,7 @@ public class CustomerRepository
             foreach (var row in DapperUtilsRepository<dynamic>.GetAll(Customer.GETALL))
             {
                 Address address = new(row.Street, row.PostalCode, row.District, row.StreetType, row.AdditionalInfo, row.Number, row.State, row.City);
+                address.Id = row.Id;
                 Customer customer = new(row.Document, row.Name, row.BirthDate, address, row.Phone, row.Email, row.Income);
 
                 list.Add(customer);
@@ -47,6 +48,7 @@ public class CustomerRepository
                 {
                     Address address = new()
                     {
+                        Id = Convert.ToInt32(reader["Id"]),
                         Street = reader["Street"].ToString(),
                         PostalCode = reader["PostalCode"].ToString(),
                         District = reader["District"].ToString(),
@@ -85,7 +87,14 @@ public class CustomerRepository
     {
         if (technology.Equals("dapper"))
         {
-            return DapperUtilsRepository<Customer>.Get(Customer.GET, new { Document = document });
+            dynamic row = DapperUtilsRepository<dynamic>.Get(Customer.GET, new { Document = document });
+
+            if(row == null) return null;
+
+            Address address = new(row.Street, row.PostalCode, row.District, row.StreetType, row.AdditionalInfo, row.Number, row.State, row.City);
+            address.Id = row.Id;
+            Customer customer = new(row.Document, row.Name, row.BirthDate, address, row.Phone, row.Email, row.Income);
+            return customer;
         }
 
         if (technology.Equals("ado"))
@@ -105,6 +114,7 @@ public class CustomerRepository
                 {
                     Address address = new()
                     {
+                        Id = Convert.ToInt32(reader["Id"]),
                         Street = reader["Street"].ToString(),
                         PostalCode = reader["PostalCode"].ToString(),
                         District = reader["District"].ToString(),

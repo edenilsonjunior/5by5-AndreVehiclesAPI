@@ -35,7 +35,7 @@ public class CarOperationRepository
                 Operation o = new()
                 {
                     Id = row.OperationId,
-                    Description = row.Description
+                    Description = row.OperationDescription
                 };
 
                 list.Add(new CarOperation
@@ -79,7 +79,7 @@ public class CarOperationRepository
                     Operation o = new()
                     {
                         Id = Convert.ToInt32(reader["OperationId"]),
-                        Description = reader["Description"].ToString()
+                        Description = reader["OperationDescription"].ToString()
                     };
 
                     CarOperation carOperation = new()
@@ -114,25 +114,31 @@ public class CarOperationRepository
             if (row == null)
                 return null;
 
-            return new CarOperation
+            Car car = new()
+            {
+                Plate = row.Plate,
+                Name = row.Name,
+                YearManufacture = row.YearManufacture,
+                YearModel = row.YearModel,
+                Color = row.Color,
+                Sold = row.Sold
+            };
+
+            Operation operation = new()
+            {
+                Id = row.OperationId,
+                Description = row.OperationDescription
+            };
+
+            CarOperation carOperation = new()
             {
                 Id = row.CarOperationId,
-                Status = row.CarOperationStatus,
-                Car =
-                {
-                    Plate = row.Plate,
-                    Name = row.Name,
-                    YearManufacture = row.YearManufacture,
-                    YearModel = row.YearModel,
-                    Color = row.Color,
-                    Sold = row.Sold
-                },
-                Operation = 
-                {
-                    Id = row.OperationId,
-                    Description = row.Description
-                }
+                Car = car,
+                Operation = operation,
+                Status = row.CarOperationStatus
             };
+
+            return carOperation;
         }
 
         if (technology.Equals("ado"))
@@ -150,25 +156,32 @@ public class CarOperationRepository
 
                 if (reader.Read())
                 {
-                    return new CarOperation
+
+                    Car car = new()
+                    {
+                        Plate = reader["Plate"].ToString(),
+                        Name = reader["Name"].ToString(),
+                        YearManufacture = Convert.ToInt32(reader["YearManufacture"]),
+                        YearModel = Convert.ToInt32(reader["YearModel"]),
+                        Color = reader["Color"].ToString(),
+                        Sold = Convert.ToBoolean(reader["Sold"])
+                    };
+
+                    Operation operation = new()
+                    {
+                        Id = Convert.ToInt32(reader["OperationId"]),
+                        Description = reader["OperationDescription"].ToString()
+                    };
+
+                    CarOperation carOperation = new()
                     {
                         Id = Convert.ToInt32(reader["CarOperationId"]),
-                        Status = Convert.ToBoolean(reader["CarOperationStatus"]),
-                        Car = 
-                        {
-                            Plate = reader["Plate"].ToString(),
-                            Name = reader["Name"].ToString(),
-                            YearManufacture = Convert.ToInt32(reader["YearManufacture"]),
-                            YearModel = Convert.ToInt32(reader["YearModel"]),
-                            Color = reader["Color"].ToString(),
-                            Sold = Convert.ToBoolean(reader["Sold"])
-                        },
-                        Operation = 
-                        {
-                            Id = Convert.ToInt32(reader["OperationId"]),
-                            Description = reader["Description"].ToString()
-                        }
+                        Car = car,
+                        Operation = operation,
+                        Status = Convert.ToBoolean(reader["CarOperationStatus"])
                     };
+
+                    return carOperation;
                 }
             }
             catch (Exception)
@@ -181,7 +194,7 @@ public class CarOperationRepository
     }
 
 
-    public bool Post(string technology, CarOperation carOperation)
+    public int Post(string technology, CarOperation carOperation)
     {
         if (technology.Equals("dapper"))
         {
@@ -191,7 +204,7 @@ public class CarOperationRepository
                 OperationId = carOperation.Operation.Id,
                 Status = carOperation.Status
             };
-            return DapperUtilsRepository<CarOperation>.Insert(CarOperation.POST, obj);
+            return DapperUtilsRepository<CarOperation>.InsertWithScalar(CarOperation.POST, obj);
         }
 
         if (technology.Equals("ado"))
@@ -207,15 +220,15 @@ public class CarOperationRepository
                 command.Parameters.AddWithValue("@OperationId", carOperation.Operation.Id);
                 command.Parameters.AddWithValue("@Status", carOperation.Status);
 
-                return command.ExecuteNonQuery() > 0;
+                return (int)command.ExecuteScalar();
             }
             catch (Exception)
             {
-                return false;
+                return -1;
             }
         }
 
-        return false;
+        return -1;
     }
 
 }

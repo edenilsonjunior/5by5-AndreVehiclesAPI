@@ -78,6 +78,10 @@ public class CustomersController : ControllerBase
             Income = customerDTO.Income
         };
 
+        if (new AddressService().PostMongo(address) == null)
+            return BadRequest("Failed to save address in MongoDB.");
+
+
         switch (technology)
         {
             case "entity":

@@ -10,7 +10,7 @@ public class EmployeeDTO
     public AddressDTO Address { get; set; }
     public string Phone { get; set; }
     public string Email { get; set; }
-    public int RoleId { get; set; }
+    public RoleDTO Role { get; set; }
     public decimal CommissionValue { get; set; }
     public decimal Commission { get; set; }
 }

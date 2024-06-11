@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Cars;
+using Models.DTO.Cars;
 using Services.Cars;
 
 namespace AndreVehicles.CarOperationAPI.Controllers;
@@ -11,11 +12,16 @@ namespace AndreVehicles.CarOperationAPI.Controllers;
 public class CarOperationsController : ControllerBase
 {
     private readonly AndreVehiclesCarOperationAPIContext _context;
+
+    private readonly CarService _carService;
+    private readonly OperationService _operationService;
     private readonly CarOperationService _service;
 
     public CarOperationsController(AndreVehiclesCarOperationAPIContext context)
     {
         _context = context;
+        _carService = new CarService();
+        _operationService = new OperationService();
         _service = new CarOperationService();
     }
 
@@ -72,25 +78,57 @@ public class CarOperationsController : ControllerBase
 
 
     [HttpPost("{technology}")] // POST: api/CarOperations
-    public async Task<ActionResult<CarOperation>> PostCarOperation(string technology, CarOperation carOperation)
+    public async Task<ActionResult<CarOperation>> PostCarOperation(string technology, CarOperationDTO carOperationDTO)
     {
+
+        Car car;
+        Operation operation;
+        CarOperation co;
+
         switch (technology)
         {
             case "entity":
+
                 if (_context.CarOperation == null)
                     return Problem("Entity set 'AndreVehiclesCarOperationAPIContext.CarOperation'  is null.");
 
-                _context.CarOperation.Add(carOperation);
+                car = await _context.Car.FindAsync(carOperationDTO.CarPlate);
+                if (car == null) return NotFound("Car not found.");
+
+                operation = await _context.Operation.FindAsync(carOperationDTO.OperationId);
+                if (operation == null) return NotFound("Operation not found.");
+
+                co = new CarOperation
+                {
+                    Car = car,
+                    Operation = operation,
+                    Status = carOperationDTO.Status
+                };
+
+                _context.CarOperation.Add(co);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction("GetCar", new { id = carOperation.Id }, carOperation);
+                return CreatedAtAction("GetCarOperation", new {technology, id = co.Id }, co);
 
             case "dapper":
             case "ado":
 
-                bool success = _service.Post(technology, carOperation);
+                car = _carService.Get(technology, carOperationDTO.CarPlate);
+                if (car == null) return NotFound("Car not found.");
 
-                return success ? CreatedAtAction("GetCar", new { id = carOperation.Id }, carOperation) : BadRequest();
+                operation = _operationService.Get(technology, carOperationDTO.OperationId);
+                if (operation == null) return NotFound("Operation not found.");
+
+                co = new CarOperation
+                {
+                    Car = car,
+                    Operation = operation,
+                    Status = carOperationDTO.Status
+                };
+
+                co.Id = _service.Post(technology, co);
+
+                return co.Id != -1 ? CreatedAtAction("GetCarOperation", new {technology, id = co.Id }, co) : BadRequest();
 
             default:
                 return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");
