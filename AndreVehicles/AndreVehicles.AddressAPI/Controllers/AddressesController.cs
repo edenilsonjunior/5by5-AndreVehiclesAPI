@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Models.DTO.People;
 using Models.People;
 using Services.People;
+using System.Net;
 
 namespace AndreVehicles.AddressAPI.Controllers;
 
@@ -13,186 +14,127 @@ public class AddressesController : ControllerBase
 {
     private readonly AndreVehiclesAddressAPIContext _context;
     private readonly AddressService _service;
+    private readonly string InvalidTechnology = "Invalid technology. Valid values are: entity, dapper, ado";
 
-    public AddressesController(AndreVehiclesAddressAPIContext context)
+    public AddressesController(AndreVehiclesAddressAPIContext context, AddressService addressService)
     {
         _context = context;
-        _service = new AddressService();
+        _service = addressService;
     }
 
 
     [HttpGet("{technology}")]
     public async Task<ActionResult<IEnumerable<Address>>> GetAddress(string technology)
     {
-        switch (technology)
+        return technology switch
         {
-            case "entity":
-                if (_context.Address == null)
-                    return NotFound();
-
-                return await _context.Address.ToListAsync();
-
-            case "dapper":
-            case "ado":
-                var list = _service.Get(technology);
-                return list != null ? Ok(list) : NotFound();
-            default:
-                return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");
-        }
+            "entity" => await GetAllWithEntity(),
+            "dapper" or "ado" => await GetAllWithDapperOrAdo(technology),
+            _ => BadRequest(InvalidTechnology),
+        };
     }
+
 
 
     [HttpGet("{technology}/{id}")]
     public async Task<ActionResult<Address>> GetAddress(string technology, int id)
     {
-        switch (technology)
+        return technology switch
         {
-            case "entity":
-                if (_context.Address == null)
-                    return NotFound();
-
-                return await _context.Address.FindAsync(id);
-
-            case "dapper":
-            case "ado":
-                var a = _service.Get(technology, id);
-                return a != null ? Ok(a) : NotFound();
-            default:
-                return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");
-        }
-
+            "entity" => await GetByIdWithEntity(id),
+            "dapper" or "ado" => await GetByIdWithDapperOrAdo(technology, id),
+            _ => BadRequest(InvalidTechnology),
+        };
     }
+
 
 
     [HttpPost("{technology}")]
     public async Task<ActionResult<Address>> PostAddress(string technology, AddressDTO addressDTO)
     {
-        Address address = await _service.GetAddressByPostalCode(addressDTO);
+        Address address = await _service.GetAddressByPostalCode(addressDTO.PostalCode);
+
+        address.PostalCode = addressDTO.PostalCode;
+        address.AdditionalInfo = addressDTO.AdditionalInfo;
+        address.Number = addressDTO.Number;
+        address.StreetType = addressDTO.StreetType;
 
         if (address == null)
             return BadRequest("Failed to get address by postal code.");
 
-
-        if(new AddressService().PostMongo(address) == null)
+        if (_service.PostMongo(address) == null)
             return BadRequest("Failed to save address in MongoDB.");
 
-        switch (technology)
+
+        return (technology) switch
         {
-            case "entity":
-                if (_context.Address == null)
-                    return Problem("Entity set 'AndreVehiclesAddressAPIContext.Address'  is null.");
-
-                _context.Address.Add(address);
-                await _context.SaveChangesAsync();
-
-                return CreatedAtAction("GetAddress", new { technology, id = address.Id }, address);
-
-            case "dapper":
-            case "ado":
-                address.Id = _service.Post(technology, address);
-
-                return address.Id != -1 ? CreatedAtAction("GetAddress", new { technology, id = address.Id }, address) : BadRequest("Failed to insert Address.");
-
-            default:
-                return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            "entity" => await PostWithEntity(technology, address),
+            "dapper" or "ado" => await PostWithDapperOrAdo(technology, address),
+            _ => BadRequest(InvalidTechnology),
+        };
     }
 
-    /*
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutAddress(int id, Address address)
+
+    [HttpGet("/GetAddressByCep/{cep}")]
+    public async Task<ActionResult<Address>> GetAddressByCep(string cep)
     {
-        if (id != address.Id)
-        {
-            return BadRequest();
-        }
-
-        _context.Entry(address).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!AddressExists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        return NoContent();
+        Address address = await _service.GetAddressByPostalCode(cep);
+        return address != null ? Ok(address) : NotFound();
     }
 
-    // DELETE: api/Addresses/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteAddress(int id)
+
+
+    private async Task<ActionResult<Address>> GetByIdWithEntity(int id)
     {
         if (_context.Address == null)
-        {
             return NotFound();
-        }
-        var address = await _context.Address.FindAsync(id);
-        if (address == null)
-        {
-            return NotFound();
-        }
 
-        _context.Address.Remove(address);
+        var address = await _context.Address.FindAsync(id);
+        return address != null ? Ok(address) : NotFound();
+    }
+
+    private async Task<ActionResult<Address>> GetByIdWithDapperOrAdo(string technology, int id)
+    {
+        var address = _service.Get(technology, id);
+        return address != null ? Ok(address) : NotFound();
+    }
+
+
+
+    private async Task<ActionResult<IEnumerable<Address>>> GetAllWithEntity()
+    {
+        if (_context.Address == null)
+            return NotFound();
+
+        return await _context.Address.ToListAsync();
+    }
+
+    private async Task<ActionResult<IEnumerable<Address>>> GetAllWithDapperOrAdo(string technology)
+    {
+        var list = _service.Get(technology);
+        return list != null ? Ok(list) : NotFound();
+    }
+
+
+
+    private async Task<ActionResult<Address>> PostWithEntity(string technology, Address address)
+    {
+        if (_context.Address == null)
+            return Problem("Entity set 'AndreVehiclesAddressAPIContext.Address' is null.");
+
+        _context.Address.Add(address);
         await _context.SaveChangesAsync();
 
-        return NoContent();
+        return CreatedAtAction("GetAddress", new { technology, id = address.Id }, address);
     }
-    */
 
-    private bool AddressExists(int id)
+    private async Task<ActionResult<Address>> PostWithDapperOrAdo(string technology, Address address)
     {
-        return (_context.Address?.Any(e => e.Id == id)).GetValueOrDefault();
+        address.Id = _service.Post(technology, address);
+
+        if (address.Id != -1)
+            return CreatedAtAction("GetAddress", new { technology, id = address.Id }, address);
+        else
+            return BadRequest("Failed to insert Address.");
     }
 }

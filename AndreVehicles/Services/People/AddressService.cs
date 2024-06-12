@@ -37,7 +37,7 @@ public class AddressService
         return _addressRepository.Post(technology, address);
     }
 
-    public async Task<Address> GetAddressByPostalCode(AddressDTO addressDTO)
+    public async Task<Address> GetAddressByPostalCode(string cep)
     {
         dynamic responseAsDynamic = null;
         try
@@ -45,7 +45,7 @@ public class AddressService
             using (HttpClient client = new HttpClient())
             {
                 string viacep = "https://viacep.com.br/ws";
-                string url = $"{viacep}/{addressDTO.PostalCode}/json/";
+                string url = $"{viacep}/{cep}/json/";
 
                 HttpResponseMessage response = await client.GetAsync(url);
 
@@ -71,13 +71,9 @@ public class AddressService
         Address address = new Address()
         {
             Street = responseAsDynamic.logradouro,
-            PostalCode = addressDTO.PostalCode,
             District = responseAsDynamic.bairro,
             State = responseAsDynamic.uf,
             City = responseAsDynamic.localidade,
-            AdditionalInfo = addressDTO.AdditionalInfo,
-            Number = addressDTO.Number,
-            StreetType = addressDTO.StreetType
         };
         return address;
     }

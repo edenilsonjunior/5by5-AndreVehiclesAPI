@@ -65,7 +65,33 @@ public class CustomersController : ControllerBase
     [HttpPost("{technology}")]
     public async Task<ActionResult<Customer>> PostCustomer(string technology, CustomerDTO customerDTO)
     {
-        Address address = await new AddressService().GetAddressByPostalCode(customerDTO.Address);
+
+        Address? address;
+
+        try
+        {
+            using HttpClient client = new();
+            client.BaseAddress = new Uri("https://localhost:7020");
+
+            string cep = customerDTO.Address.PostalCode;
+            HttpResponseMessage response = await client.GetAsync($"/GetAddressByCep/{cep}");
+
+            response.EnsureSuccessStatusCode();
+            address = await response.Content.ReadFromJsonAsync<Address>();
+        }
+        catch (Exception)
+        {
+            return BadRequest($"Failed to retrieve address.");
+        }
+
+        if (address == null)
+            return BadRequest("Address not found.");
+
+        address.PostalCode = customerDTO.Address.PostalCode;
+        address.AdditionalInfo = customerDTO.Address.AdditionalInfo;
+        address.Number = customerDTO.Address.Number;
+        address.StreetType = customerDTO.Address.StreetType;
+
 
         Customer customer = new()
         {
@@ -103,58 +129,4 @@ public class CustomersController : ControllerBase
         }
     }
 
-    /*
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutCustomer(string id, Customer customer)
-    {
-        if (id != customer.Document)
-        {
-            return BadRequest();
-        }
-
-        _context.Entry(customer).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!CustomerExists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        return NoContent();
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteCustomer(string id)
-    {
-        if (_context.Customer == null)
-        {
-            return NotFound();
-        }
-
-        var customer = await _context.Customer.FindAsync(id);
-        if (customer == null)
-        {
-            return NotFound();
-        }
-
-        _context.Customer.Remove(customer);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
-    } */
-
-    private bool CustomerExists(string id)
-    {
-        return (_context.Customer?.Any(e => e.Document == id)).GetValueOrDefault();
-    }
 }

@@ -7,4 +7,5 @@ public class MongoDataBaseSettings : IMongoDataBaseSettings
     public string TermsOfUseCollectionName { get; set; }
     public string TermsOfUseAcceptCollectionName { get; set; }
     public string BankCollectionName { get; set; }
+    public string AddressCollectionName { get; set; }
 }

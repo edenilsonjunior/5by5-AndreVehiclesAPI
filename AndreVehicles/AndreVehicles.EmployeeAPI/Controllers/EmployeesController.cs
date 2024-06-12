@@ -69,7 +69,38 @@ public class EmployeesController : ControllerBase
     [HttpPost("{technology}")]
     public async Task<ActionResult<Employee>> PostEmployee(string technology, EmployeeDTO employeeDTO)
     {
-        Address address = await new AddressService().GetAddressByPostalCode(employeeDTO.Address);
+
+        Address? address;
+
+        try
+        {
+            using HttpClient client = new();
+            client.BaseAddress = new Uri("https://localhost:7020");
+
+            string cep = employeeDTO.Address.PostalCode;
+            HttpResponseMessage response = await client.GetAsync($"/GetAddressByCep/{cep}");
+
+            response.EnsureSuccessStatusCode();
+            address = await response.Content.ReadFromJsonAsync<Address>();
+        }
+        catch (Exception)
+        {
+            return BadRequest($"Failed to retrieve address.");
+        }
+
+        if (address == null)
+            return BadRequest("Address not found.");
+
+        address.PostalCode = employeeDTO.Address.PostalCode;
+        address.AdditionalInfo = employeeDTO.Address.AdditionalInfo;
+        address.Number = employeeDTO.Address.Number;
+        address.StreetType = employeeDTO.Address.StreetType;
+
+
+
+
+
+
 
         Employee employee = new()
         {
