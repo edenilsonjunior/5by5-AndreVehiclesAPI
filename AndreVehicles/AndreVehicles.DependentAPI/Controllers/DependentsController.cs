@@ -51,10 +51,32 @@ public class DependentsController : ControllerBase
         if (customer == null)
             return NotFound("Customer not found!");
 
-        Address address = await new AddressService().GetAddressByPostalCode(dependentDTO.Address);
+        Address? address;
+
+        try
+        {
+            using HttpClient client = new();
+            client.BaseAddress = new Uri("https://localhost:7020");
+
+            string cep = dependentDTO.Address.PostalCode;
+            HttpResponseMessage response = await client.GetAsync($"/GetAddressByCep/{cep}");
+
+            response.EnsureSuccessStatusCode();
+            address = await response.Content.ReadFromJsonAsync<Address>();
+        }
+        catch (Exception)
+        {
+            return BadRequest($"Failed to retrieve address.");
+        }
 
         if (address == null)
-            return NotFound("Address not found!");
+            return BadRequest("Address not found.");
+
+        address.PostalCode = dependentDTO.Address.PostalCode;
+        address.AdditionalInfo = dependentDTO.Address.AdditionalInfo;
+        address.Number = dependentDTO.Address.Number;
+        address.StreetType = dependentDTO.Address.StreetType;
+
 
         var dependent = new Dependent()
         {
