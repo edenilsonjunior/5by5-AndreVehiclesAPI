@@ -143,61 +143,12 @@ public class SalesController : ControllerBase
     }
 
 
-    /*
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutSale(int id, Sale sale)
+
+    [HttpGet("/GetSaleById/{technology}/{id}")]
+    public Sale? GetSaleById(string technology, int id)
     {
-        if (id != sale.Id)
-        {
-            return BadRequest();
-        }
-
-        _context.Entry(sale).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!SaleExists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        return NoContent();
+        var sale = _service.Get(technology, id);
+        return sale;
     }
 
-
-    // DELETE: api/Sales/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteSale(int id)
-    {
-        if (_context.Sale == null)
-        {
-            return NotFound();
-        }
-        var sale = await _context.Sale.FindAsync(id);
-        if (sale == null)
-        {
-            return NotFound();
-        }
-
-        _context.Sale.Remove(sale);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
-    }
-    */
-
-
-    private bool SaleExists(int id)
-    {
-        return (_context.Sale?.Any(e => e.Id == id)).GetValueOrDefault();
-    }
 }
