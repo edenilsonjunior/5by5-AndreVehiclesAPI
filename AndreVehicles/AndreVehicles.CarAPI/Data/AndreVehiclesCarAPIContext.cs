@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Models.Cars;
+using Models.Financials;
 using Models.People;
 using Models.Sales;
 
@@ -25,6 +27,20 @@ namespace AndreVehicles.CarAPI.Data
             CreateCarsBuilder(modelBuilder);
             CreatePeopleBuilder(modelBuilder);
             CreateSalesBuilder(modelBuilder);
+
+            modelBuilder.Entity<FinancialPending>(entity =>
+            {
+                entity.ToTable("FinancialPending");
+                entity.HasKey(fp => fp.Id);
+
+                entity.Property(fp => fp.Id)
+                    .UseIdentityColumn(seed: 1, increment: 1);
+
+                entity.HasOne(fp => fp.Customer)
+                .WithMany()
+                .HasForeignKey("CustomerDocument");
+            });
+
         }
 
         private void CreateCarsBuilder(ModelBuilder modelBuilder)
