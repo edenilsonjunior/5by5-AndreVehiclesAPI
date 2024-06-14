@@ -245,28 +245,3 @@ CREATE TABLE Sale(
     CONSTRAINT fk_sale_car FOREIGN KEY (CarPlate) REFERENCES Car(Plate),
     CONSTRAINT fk_sale_payment FOREIGN KEY (PaymentId) REFERENCES Payment(Id)
 );
-
-
-INSERT INTO Address(Street, PostalCode, District, StreetType, AdditionalInfo, Number, State, City) VALUES('Rua 1', '12345678', 'Bairro 1', 'Rua', 'Casa 1', 1, 'Estado 1', 'Cidade 1');
-INSERT INTO Address(Street, PostalCode, District, StreetType, AdditionalInfo, Number, State, City) VALUES('Rua 2', '12345678', 'Bairro 2', 'Rua', 'Casa 2', 2, 'Estado 2', 'Cidade 2');
-
-select * from Address;
-
-INSERT INTO Person(Document, Name, BirthDate, AddressId, Phone, Email) VALUES('43242', 'Cliente', '1990-01-01', 33, '123456789', 'cliente@email.com');
-INSERT INTO Person(Document, Name, BirthDate, AddressId, Phone, Email) VALUES('42343242', 'Funcionario', '1990-01-01', 32, '123456789', 'funcionario@email.com');
-
-INSERT INTO Role(Description) VALUES('Vendedor');
-
-INSERT INTO Customer(Document, Income) VALUES('43242', 30000);
-INSERT INTO Employee(Document, RoleId, CommissionValue, Commission) VALUES('42343242', 1, 0.1, 0.0);
-
-
-INSERT INTO Car(Plate, Name, YearManufacture, YearModel, Color, Sold) VALUES('ABC1234', 'Carro 1', 2020, 2020, 'Azul', 0);
-
-INSERT INTO BankSlip(Number, DueDate) VALUES(123, '2021-12-31');
-
-INSERT INTO Payment(CardNumber, BankSlipId, PixId, PaymentDate) VALUES('1234567890123456', NULL, NULL, '2021-12-31');
-
-INSERT INTO Sale(CustomerDocument, EmployeeDocument, CarPlate, PaymentId, SaleDate, SalePrice) VALUES('43242', '42343242', 'ABC1234', 1, '2021-12-31', 30000);
-
-select * from sale;
