@@ -41,6 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndreVehicles.CarFinancingA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndreVehicles.DriverAPI", "AndreVehicles.DriverAPI\AndreVehicles.DriverAPI.csproj", "{24174565-8941-44CB-AAE7-C1BD7B5D6DDF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndreVehicles.InsuranceAPI", "AndreVehicles.InsuranceAPI\AndreVehicles.InsuranceAPI.csproj", "{FC1B6090-FCD6-4155-AE1E-C9BA14EABE8A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -123,6 +125,10 @@ Global
 		{24174565-8941-44CB-AAE7-C1BD7B5D6DDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24174565-8941-44CB-AAE7-C1BD7B5D6DDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24174565-8941-44CB-AAE7-C1BD7B5D6DDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC1B6090-FCD6-4155-AE1E-C9BA14EABE8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC1B6090-FCD6-4155-AE1E-C9BA14EABE8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC1B6090-FCD6-4155-AE1E-C9BA14EABE8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC1B6090-FCD6-4155-AE1E-C9BA14EABE8A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

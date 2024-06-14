@@ -268,3 +268,40 @@ CREATE TABLE CarFinancing(
     CONSTRAINT fk_carFinancing_bank FOREIGN KEY (BankCnpj) REFERENCES Bank(Cnpj),*/
 );
 
+
+CREATE TABLE Bank(
+
+    Cnpj VARCHAR(255) NOT NULL,
+    Name VARCHAR(255) NOT NULL,
+    FoundationDate DATETIME NOT NULL,
+
+    CONSTRAINT pk_bank PRIMARY KEY (Cnpj)
+);
+
+
+CREATE TABLE CarFinancing(
+
+    Id INT IDENTITY(1,1) NOT NULL,
+    SaleId INT NOT NULL,
+    FinancingDate DATETIME NOT NULL,
+    BankCnpj VARCHAR(255),
+
+    CONSTRAINT pk_carFinancing PRIMARY KEY (Id),
+    CONSTRAINT fk_carFinancing_sale FOREIGN KEY (SaleId) REFERENCES Sale(Id)/*,
+    CONSTRAINT fk_carFinancing_bank FOREIGN KEY (BankCnpj) REFERENCES Bank(Cnpj),*/
+);
+
+
+CREATE TABLE Insurance(
+
+    Id INT IDENTITY(1,1) NOT NULL,
+    CustomerDocument NVARCHAR(14) NOT NULL,
+    Deductible NVARCHAR(255) NOT NULL,
+    CarPlate NVARCHAR(8) NOT NULL,
+    MainDriverDocument NVARCHAR(14) NOT NULL
+
+    CONSTRAINT pk_insurance PRIMARY KEY (Id),
+    CONSTRAINT fk_insurance_customer FOREIGN KEY (CustomerDocument) REFERENCES Customer(Document),
+    CONSTRAINT fk_insurance_car FOREIGN KEY (CarPlate) REFERENCES Car(Plate),
+    CONSTRAINT fk_insurance_main_driver FOREIGN KEY (MainDriverDocument) REFERENCES Person(Document)
+);
