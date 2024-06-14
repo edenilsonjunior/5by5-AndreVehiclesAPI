@@ -246,27 +246,6 @@ CREATE TABLE Sale(
     CONSTRAINT fk_sale_payment FOREIGN KEY (PaymentId) REFERENCES Payment(Id)
 );
 
-CREATE TABLE Bank(
-
-    Cnpj VARCHAR(255) NOT NULL,
-    Name VARCHAR(255) NOT NULL,
-    FoundationDate DATETIME NOT NULL,
-
-    CONSTRAINT pk_bank PRIMARY KEY (Cnpj)
-);
-
-
-CREATE TABLE CarFinancing(
-
-    Id INT IDENTITY(1,1) NOT NULL,
-    SaleId INT NOT NULL,
-    FinancingDate DATETIME NOT NULL,
-    BankCnpj VARCHAR(255),
-
-    CONSTRAINT pk_carFinancing PRIMARY KEY (Id),
-    CONSTRAINT fk_carFinancing_sale FOREIGN KEY (SaleId) REFERENCES Sale(Id)/*,
-    CONSTRAINT fk_carFinancing_bank FOREIGN KEY (BankCnpj) REFERENCES Bank(Cnpj),*/
-);
 
 
 CREATE TABLE Bank(
@@ -290,6 +269,7 @@ CREATE TABLE CarFinancing(
     CONSTRAINT fk_carFinancing_sale FOREIGN KEY (SaleId) REFERENCES Sale(Id)/*,
     CONSTRAINT fk_carFinancing_bank FOREIGN KEY (BankCnpj) REFERENCES Bank(Cnpj),*/
 );
+
 
 
 CREATE TABLE Insurance(
