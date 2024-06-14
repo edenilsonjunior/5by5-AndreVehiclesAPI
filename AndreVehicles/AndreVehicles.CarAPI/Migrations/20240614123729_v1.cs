@@ -298,6 +298,30 @@ namespace AndreVehicles.CarAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FinancialPending",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerDocument = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    FinancialPendingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FinancialPending", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FinancialPending_Customer_CustomerDocument",
+                        column: x => x.CustomerDocument,
+                        principalTable: "Customer",
+                        principalColumn: "Document",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Sale",
                 columns: table => new
                 {
@@ -360,6 +384,11 @@ namespace AndreVehicles.CarAPI.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_FinancialPending_CustomerDocument",
+                table: "FinancialPending",
+                column: "CustomerDocument");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Payment_BankSlipId",
                 table: "Payment",
                 column: "BankSlipId");
@@ -417,6 +446,9 @@ namespace AndreVehicles.CarAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Dependent");
+
+            migrationBuilder.DropTable(
+                name: "FinancialPending");
 
             migrationBuilder.DropTable(
                 name: "Purchase");

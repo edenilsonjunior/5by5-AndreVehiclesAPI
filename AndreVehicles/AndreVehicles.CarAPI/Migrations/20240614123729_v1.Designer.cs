@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AndreVehicles.CarAPI.Migrations
 {
     [DbContext(typeof(AndreVehiclesCarAPIContext))]
-    [Migration("20240612012311_V2")]
-    partial class V2
+    [Migration("20240614123729_v1")]
+    partial class v1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -157,11 +157,8 @@ namespace AndreVehicles.CarAPI.Migrations
 
             modelBuilder.Entity("Models.People.Address", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AdditionalInfo")
                         .IsRequired()
@@ -194,10 +191,6 @@ namespace AndreVehicles.CarAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("_id")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
                     b.ToTable("Address", (string)null);
@@ -208,8 +201,9 @@ namespace AndreVehicles.CarAPI.Migrations
                     b.Property<string>("Document")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("AddressId")
-                        .HasColumnType("int");
+                    b.Property<string>("AddressId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
@@ -413,6 +407,19 @@ namespace AndreVehicles.CarAPI.Migrations
                     b.ToTable("Customer", (string)null);
                 });
 
+            modelBuilder.Entity("Models.People.Dependent", b =>
+                {
+                    b.HasBaseType("Models.People.Person");
+
+                    b.Property<string>("CustomerDocument")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasIndex("CustomerDocument");
+
+                    b.ToTable("Dependent", (string)null);
+                });
+
             modelBuilder.Entity("Models.People.Employee", b =>
                 {
                     b.HasBaseType("Models.People.Person");
@@ -557,6 +564,23 @@ namespace AndreVehicles.CarAPI.Migrations
                         .HasForeignKey("Models.People.Customer", "Document")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Models.People.Dependent", b =>
+                {
+                    b.HasOne("Models.People.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerDocument")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Models.People.Person", null)
+                        .WithOne()
+                        .HasForeignKey("Models.People.Dependent", "Document")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("Models.People.Employee", b =>
