@@ -1,3 +1,7 @@
+using Microsoft.Extensions.Options;
+using Services.Financials;
+using Services.Utils;
+
 namespace AndreVehicles.BankMongo
 {
     public class Program
@@ -12,6 +16,19 @@ namespace AndreVehicles.BankMongo
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+
+
+            builder.Services.Configure<MongoDataBaseSettings>(
+               builder.Configuration.GetSection(nameof(MongoDataBaseSettings)));
+
+            builder.Services.AddSingleton<IMongoDataBaseSettings>(sp =>
+                sp.GetRequiredService<IOptions<MongoDataBaseSettings>>().Value);
+
+            builder.Services.AddSingleton<BankService>();
+
+
+
 
             var app = builder.Build();
 
