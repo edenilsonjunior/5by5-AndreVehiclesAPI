@@ -275,6 +275,29 @@ namespace AndreVehicles.CarAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Dependent",
+                columns: table => new
+                {
+                    Document = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CustomerDocument = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Dependent", x => x.Document);
+                    table.ForeignKey(
+                        name: "FK_Dependent_Customer_CustomerDocument",
+                        column: x => x.CustomerDocument,
+                        principalTable: "Customer",
+                        principalColumn: "Document",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Dependent_Person_Document",
+                        column: x => x.Document,
+                        principalTable: "Person",
+                        principalColumn: "Document");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Sale",
                 columns: table => new
                 {
@@ -325,6 +348,11 @@ namespace AndreVehicles.CarAPI.Migrations
                 name: "IX_CarOperation_OperationId",
                 table: "CarOperation",
                 column: "OperationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Dependent_CustomerDocument",
+                table: "Dependent",
+                column: "CustomerDocument");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Employee_RoleId",
@@ -386,6 +414,9 @@ namespace AndreVehicles.CarAPI.Migrations
         {
             migrationBuilder.DropTable(
                 name: "CarOperation");
+
+            migrationBuilder.DropTable(
+                name: "Dependent");
 
             migrationBuilder.DropTable(
                 name: "Purchase");

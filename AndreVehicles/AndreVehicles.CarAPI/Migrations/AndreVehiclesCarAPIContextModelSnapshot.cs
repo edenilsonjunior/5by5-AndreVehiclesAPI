@@ -370,6 +370,19 @@ namespace AndreVehicles.CarAPI.Migrations
                     b.ToTable("Customer", (string)null);
                 });
 
+            modelBuilder.Entity("Models.People.Dependent", b =>
+                {
+                    b.HasBaseType("Models.People.Person");
+
+                    b.Property<string>("CustomerDocument")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasIndex("CustomerDocument");
+
+                    b.ToTable("Dependent", (string)null);
+                });
+
             modelBuilder.Entity("Models.People.Employee", b =>
                 {
                     b.HasBaseType("Models.People.Person");
@@ -503,6 +516,23 @@ namespace AndreVehicles.CarAPI.Migrations
                         .HasForeignKey("Models.People.Customer", "Document")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Models.People.Dependent", b =>
+                {
+                    b.HasOne("Models.People.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerDocument")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Models.People.Person", null)
+                        .WithOne()
+                        .HasForeignKey("Models.People.Dependent", "Document")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("Models.People.Employee", b =>
