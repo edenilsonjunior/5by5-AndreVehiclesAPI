@@ -25,8 +25,11 @@ public class AdoUtilsRepository
 
         using var command = new SqlCommand(query, connection);
 
+        if (parameters != null)
+        {
+            command.Parameters.AddRange(parameters.ToArray());
+        }
 
-        command.Parameters.AddRange(parameters.ToArray());
         await connection.OpenAsync();
 
         using var reader = await command.ExecuteReaderAsync();

@@ -2,6 +2,7 @@
 using Models.DTO.Financials;
 using Models.Financials;
 using Models.Sales;
+using Repositories;
 using Services.Financials;
 
 namespace AndreVehicles.CarFinancingAPI.Controllers;
@@ -42,8 +43,8 @@ public class CarFinancingController : ControllerBase
     [HttpPost]
     public ActionResult Post(CarFinancingDTO carFinancingDTO)
     {
-        Task<Sale?> sale = GetSaleById(carFinancingDTO.SaleId);
-        Task<Bank?> bank = GetBankByCnpj(carFinancingDTO.BankCnpj);
+        var sale = ApiConsume<Sale>.Get("https://localhost:7237/api/Sales/", $"dapper/{carFinancingDTO.SaleId}");
+        var bank = ApiConsume<Bank>.Get("https://localhost:7031/api/Banks/", $"{carFinancingDTO.BankCnpj}");
 
         Task.WaitAll(sale, bank);
 
@@ -61,48 +62,4 @@ public class CarFinancingController : ControllerBase
 
         return carFinancing.Id > 0 ? CreatedAtRoute("GetCarFinancing", new { id = carFinancing.Id }, carFinancing) : BadRequest();
     }
-
-
-    private async Task<Sale?> GetSaleById(int id)
-    {
-        Sale? sale;
-        try
-        {
-            using HttpClient client = new();
-            client.BaseAddress = new Uri("https://localhost:7237");
-
-            HttpResponseMessage response = await client.GetAsync($"/GetSaleById/dapper/{id}");
-
-            response.EnsureSuccessStatusCode();
-            sale = response.Content.ReadFromJsonAsync<Sale>().Result;
-
-            return sale;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
-    private async Task<Bank?> GetBankByCnpj(string cnpj)
-    {
-        Bank? bank;
-        try
-        {
-            using HttpClient client = new();
-            client.BaseAddress = new Uri("https://localhost:7031");
-
-            HttpResponseMessage response = await client.GetAsync($"/GetBankByCnpj/{cnpj}");
-
-            response.EnsureSuccessStatusCode();
-            bank = response.Content.ReadFromJsonAsync<Bank>().Result;
-
-            return bank;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
 }

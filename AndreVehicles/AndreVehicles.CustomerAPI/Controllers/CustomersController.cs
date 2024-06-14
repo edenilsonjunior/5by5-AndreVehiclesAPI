@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.DTO.People;
 using Models.People;
+using Repositories;
 using Services.People;
+using System.Runtime.ConstrainedExecution;
 
 namespace AndreVehicles.CustomerAPI.Controllers;
 
@@ -65,27 +67,14 @@ public class CustomersController : ControllerBase
     [HttpPost("{technology}")]
     public async Task<ActionResult<Customer>> PostCustomer(string technology, CustomerDTO customerDTO)
     {
-
         Address? address;
 
-        try
-        {
-            using HttpClient client = new();
-            client.BaseAddress = new Uri("https://localhost:7020");
-
-            string cep = customerDTO.Address.PostalCode;
-            HttpResponseMessage response = await client.GetAsync($"/GetAddressByCep/{cep}");
-
-            response.EnsureSuccessStatusCode();
-            address = await response.Content.ReadFromJsonAsync<Address>();
-        }
-        catch (Exception)
-        {
-            return BadRequest($"Failed to retrieve address.");
-        }
+        string cep = customerDTO.Address.PostalCode;
+        address = await ApiConsume<Address>.Get("https://localhost:7020", $"/GetAddressByCep/{cep}");
 
         if (address == null)
             return BadRequest("Address not found.");
+
 
         address.PostalCode = customerDTO.Address.PostalCode;
         address.AdditionalInfo = customerDTO.Address.AdditionalInfo;

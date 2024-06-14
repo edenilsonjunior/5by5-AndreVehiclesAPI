@@ -10,7 +10,6 @@ using Repositories;
 using Services.Cars;
 using Services.People;
 using Services.Sales;
-using System.Diagnostics;
 
 namespace AndreVehicles.SaleAPI.Controllers;
 
@@ -184,71 +183,5 @@ public class SalesController : ControllerBase
                 return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");
         }
     }
-
-
-
-    [HttpGet("/GetSaleById/{technology}/{id}")]
-    public Sale? GetSaleById(string technology, int id)
-    {
-        var sale = _service.Get(technology, id);
-        return sale;
-    }
-
-
-
-
-
-
-    private async Task<Customer> GetCustomer(string document)
-    {
-        Customer? customer;
-
-        try
-        {
-            using HttpClient client = new();
-            client.BaseAddress = new Uri("https://localhost:7063/api/Customers/");
-
-            HttpResponseMessage response = await client.GetAsync($"entity/{document}");
-
-            response.EnsureSuccessStatusCode();
-            customer = await response.Content.ReadFromJsonAsync<Customer>();
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-
-        if (customer == null)
-            return null;
-
-        return customer;
-    }
-
-    private async Task<Employee?> GetEmployee(string document)
-    {
-        Employee? employee;
-
-        try
-        {
-            using HttpClient client = new();
-            client.BaseAddress = new Uri("https://localhost:7296/api/Employees/");
-
-            HttpResponseMessage response = await client.GetAsync($"entity/{document}");
-
-            response.EnsureSuccessStatusCode();
-            employee = await response.Content.ReadFromJsonAsync<Employee>();
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-
-        if (employee == null)
-            return null;
-
-        return employee;
-    }
-
-
 
 }

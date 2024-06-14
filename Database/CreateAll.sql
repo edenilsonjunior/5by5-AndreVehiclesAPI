@@ -105,7 +105,7 @@ CREATE TABLE Purchase(
 
 CREATE TABLE Address(
 
-    Id INT IDENTITY(1,1) NOT NULL,
+    Id varchar(255) NOT NULL,
     Street NVARCHAR(50) NOT NULL,
     PostalCode NVARCHAR(8) NOT NULL,
     District NVARCHAR(50) NOT NULL,
@@ -124,7 +124,7 @@ CREATE TABLE Person(
     Document NVARCHAR(14) NOT NULL,
     Name NVARCHAR(50) NOT NULL,
     BirthDate DATETIME NOT NULL,
-    AddressId INT NOT NULL,
+    AddressId varchar(255) NOT NULL,
     Phone NVARCHAR(15) NOT NULL,
     Email NVARCHAR(50) NOT NULL
 
@@ -245,3 +245,26 @@ CREATE TABLE Sale(
     CONSTRAINT fk_sale_car FOREIGN KEY (CarPlate) REFERENCES Car(Plate),
     CONSTRAINT fk_sale_payment FOREIGN KEY (PaymentId) REFERENCES Payment(Id)
 );
+
+CREATE TABLE Bank(
+
+    Cnpj VARCHAR(255) NOT NULL,
+    Name VARCHAR(255) NOT NULL,
+    FoundationDate DATETIME NOT NULL,
+
+    CONSTRAINT pk_bank PRIMARY KEY (Cnpj)
+);
+
+
+CREATE TABLE CarFinancing(
+
+    Id INT IDENTITY(1,1) NOT NULL,
+    SaleId INT NOT NULL,
+    FinancingDate DATETIME NOT NULL,
+    BankCnpj VARCHAR(255),
+
+    CONSTRAINT pk_carFinancing PRIMARY KEY (Id),
+    CONSTRAINT fk_carFinancing_sale FOREIGN KEY (SaleId) REFERENCES Sale(Id)/*,
+    CONSTRAINT fk_carFinancing_bank FOREIGN KEY (BankCnpj) REFERENCES Bank(Cnpj),*/
+);
+

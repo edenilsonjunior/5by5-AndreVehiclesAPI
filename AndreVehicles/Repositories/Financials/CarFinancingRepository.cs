@@ -16,7 +16,7 @@ public class CarFinancingRepository
         {
             int id = row.Id;
 
-            Sale sale = new SaleRepository().Get(row.SaleId);
+            Sale sale = new SaleRepository().Get("dapper", row.SaleId);
 
             DateTime financingDate = row.FinancingDate;
 
@@ -42,7 +42,10 @@ public class CarFinancingRepository
 
         dynamic row = DapperUtilsRepository<dynamic>.Get(CarFinancing.GET, new { Id = id });
 
-        Sale sale = new SaleRepository().Get(row.SaleId);
+        if (row == null)
+            return null;
+
+        Sale sale = new SaleRepository().Get("dapper", row.SaleId);
 
         DateTime financingDate = row.FinancingDate;
 
