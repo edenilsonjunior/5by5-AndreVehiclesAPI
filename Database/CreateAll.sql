@@ -105,7 +105,7 @@ CREATE TABLE Purchase(
 
 CREATE TABLE Address(
 
-    Id INT IDENTITY(1,1) NOT NULL,
+    Id varchar(255) NOT NULL,
     Street NVARCHAR(50) NOT NULL,
     PostalCode NVARCHAR(8) NOT NULL,
     District NVARCHAR(50) NOT NULL,
@@ -124,7 +124,7 @@ CREATE TABLE Person(
     Document NVARCHAR(14) NOT NULL,
     Name NVARCHAR(50) NOT NULL,
     BirthDate DATETIME NOT NULL,
-    AddressId INT NOT NULL,
+    AddressId varchar(255) NOT NULL,
     Phone NVARCHAR(15) NOT NULL,
     Email NVARCHAR(50) NOT NULL
 
@@ -246,27 +246,27 @@ CREATE TABLE Sale(
     CONSTRAINT fk_sale_payment FOREIGN KEY (PaymentId) REFERENCES Payment(Id)
 );
 
+CREATE TABLE Bank(
 
-INSERT INTO Address(Street, PostalCode, District, StreetType, AdditionalInfo, Number, State, City) VALUES('Rua 1', '12345678', 'Bairro 1', 'Rua', 'Casa 1', 1, 'Estado 1', 'Cidade 1');
-INSERT INTO Address(Street, PostalCode, District, StreetType, AdditionalInfo, Number, State, City) VALUES('Rua 2', '12345678', 'Bairro 2', 'Rua', 'Casa 2', 2, 'Estado 2', 'Cidade 2');
+    Cnpj VARCHAR(255) NOT NULL,
+    Name VARCHAR(255) NOT NULL,
+    FoundationDate DATETIME NOT NULL,
 
-select * from Address;
-
-INSERT INTO Person(Document, Name, BirthDate, AddressId, Phone, Email) VALUES('43242', 'Cliente', '1990-01-01', 33, '123456789', 'cliente@email.com');
-INSERT INTO Person(Document, Name, BirthDate, AddressId, Phone, Email) VALUES('42343242', 'Funcionario', '1990-01-01', 32, '123456789', 'funcionario@email.com');
-
-INSERT INTO Role(Description) VALUES('Vendedor');
-
-INSERT INTO Customer(Document, Income) VALUES('43242', 30000);
-INSERT INTO Employee(Document, RoleId, CommissionValue, Commission) VALUES('42343242', 1, 0.1, 0.0);
+    CONSTRAINT pk_bank PRIMARY KEY (Cnpj)
+);
 
 
-INSERT INTO Car(Plate, Name, YearManufacture, YearModel, Color, Sold) VALUES('ABC1234', 'Carro 1', 2020, 2020, 'Azul', 0);
 
-INSERT INTO BankSlip(Number, DueDate) VALUES(123, '2021-12-31');
+--"INSERT INTO CarFinancing (SaleId, FinancingDate, BankCnpj) VALUES (@SaleId, @FinancingDate, @BankCnpj); CAST (SCOPE_IDENTITY() as int)";
 
-INSERT INTO Payment(CardNumber, BankSlipId, PixId, PaymentDate) VALUES('1234567890123456', NULL, NULL, '2021-12-31');
+CREATE TABLE CarFinancing(
 
-INSERT INTO Sale(CustomerDocument, EmployeeDocument, CarPlate, PaymentId, SaleDate, SalePrice) VALUES('43242', '42343242', 'ABC1234', 1, '2021-12-31', 30000);
+    Id INT IDENTITY(1,1) NOT NULL,
+    SaleId INT NOT NULL,
+    FinancingDate DATETIME NOT NULL,
+    BankCnpj VARCHAR(255),
 
-select * from sale;
+    CONSTRAINT pk_carFinancing PRIMARY KEY (Id),
+    CONSTRAINT fk_carFinancing_sale FOREIGN KEY (SaleId) REFERENCES Sale(Id)/*,
+    CONSTRAINT fk_carFinancing_bank FOREIGN KEY (BankCnpj) REFERENCES Bank(Cnpj),*/
+);

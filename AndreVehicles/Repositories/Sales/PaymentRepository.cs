@@ -69,7 +69,7 @@ public class PaymentRepository
     {
         if (technology.Equals("dapper"))
         {
-            dynamic data = DapperUtilsRepository<Payment>.Get(Payment.GET, new { Id = id });
+            dynamic data = DapperUtilsRepository<dynamic>.Get(Payment.GET, new { Id = id });
 
             if (data == null) return null;
 
