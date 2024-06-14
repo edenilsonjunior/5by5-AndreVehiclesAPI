@@ -29,6 +29,19 @@ namespace AndreVehicles.CarAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Bank",
+                columns: table => new
+                {
+                    Cnpj = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FoundationDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Bank", x => x.Cnpj);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "BankSlip",
                 columns: table => new
                 {
@@ -510,6 +523,9 @@ namespace AndreVehicles.CarAPI.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Bank");
+
             migrationBuilder.DropTable(
                 name: "CarOperation");
 

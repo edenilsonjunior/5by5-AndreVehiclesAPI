@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using AndreVehicles.BankSql.Data;
 namespace AndreVehicles.BankSql
 {
     public class Program
@@ -5,6 +8,8 @@ namespace AndreVehicles.BankSql
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddDbContext<AndreVehiclesBankSqlContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("AndreVehiclesBankSqlContext") ?? throw new InvalidOperationException("Connection string 'AndreVehiclesBankSqlContext' not found.")));
 
             // Add services to the container.
 

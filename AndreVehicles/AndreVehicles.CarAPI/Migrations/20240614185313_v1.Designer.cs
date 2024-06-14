@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AndreVehicles.CarAPI.Migrations
 {
     [DbContext(typeof(AndreVehiclesCarAPIContext))]
-    [Migration("20240614172952_v1")]
+    [Migration("20240614185313_v1")]
     partial class v1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -118,6 +118,23 @@ namespace AndreVehicles.CarAPI.Migrations
                     b.HasIndex("CarPlate");
 
                     b.ToTable("Purchase", (string)null);
+                });
+
+            modelBuilder.Entity("Models.Financials.Bank", b =>
+                {
+                    b.Property<string>("Cnpj")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("FoundationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Cnpj");
+
+                    b.ToTable("Bank", (string)null);
                 });
 
             modelBuilder.Entity("Models.Financials.FinancialPending", b =>

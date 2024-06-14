@@ -184,6 +184,12 @@ namespace AndreVehicles.CarAPI.Data
                 entity.Property(s => s.Id)
                     .UseIdentityColumn(seed: 1, increment: 1);
             });
+
+            modelBuilder.Entity<Bank>(entity =>
+            {
+                entity.ToTable("Bank");
+                entity.HasKey(b => b.Cnpj);
+            });
         }
 
     }

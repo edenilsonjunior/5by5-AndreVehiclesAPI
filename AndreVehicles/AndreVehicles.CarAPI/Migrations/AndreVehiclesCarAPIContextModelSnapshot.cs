@@ -118,6 +118,23 @@ namespace AndreVehicles.CarAPI.Migrations
                     b.ToTable("Purchase", (string)null);
                 });
 
+            modelBuilder.Entity("Models.Financials.Bank", b =>
+                {
+                    b.Property<string>("Cnpj")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("FoundationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Cnpj");
+
+                    b.ToTable("Bank", (string)null);
+                });
+
             modelBuilder.Entity("Models.Financials.FinancialPending", b =>
                 {
                     b.Property<int>("Id")
