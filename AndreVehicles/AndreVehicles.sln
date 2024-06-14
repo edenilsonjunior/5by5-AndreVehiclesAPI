@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndreVehicles.TermsOfUseAPI
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndreVehicles.BankAPI", "AndreVehicles.BankAPI\AndreVehicles.BankAPI.csproj", "{376B27BC-7294-4BDC-A6C3-C459197DAF06}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndreVehicles.CarFinancingAPI", "AndreVehicles.CarFinancingAPI\AndreVehicles.CarFinancingAPI.csproj", "{1E6616C7-07DB-48BC-92D5-8755FEF75298}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,10 @@ Global
 		{376B27BC-7294-4BDC-A6C3-C459197DAF06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{376B27BC-7294-4BDC-A6C3-C459197DAF06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{376B27BC-7294-4BDC-A6C3-C459197DAF06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E6616C7-07DB-48BC-92D5-8755FEF75298}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E6616C7-07DB-48BC-92D5-8755FEF75298}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E6616C7-07DB-48BC-92D5-8755FEF75298}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E6616C7-07DB-48BC-92D5-8755FEF75298}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,7 +6,7 @@ namespace Models.People;
 
 public class Address
 {
-    public readonly static string POST = "INSERT INTO Address (Street, PostalCode, District, StreetType, AdditionalInfo, Number, State, City) VALUES (@Street, @PostalCode, @District, @StreetType, @AdditionalInfo, @Number, @State, @City); SELECT CAST(scope_identity() as int)";
+    public readonly static string POST = "INSERT INTO Address (Id, Street, PostalCode, District, StreetType, AdditionalInfo, Number, State, City) VALUES (@Id, @Street, @PostalCode, @District, @StreetType, @AdditionalInfo, @Number, @State, @City);";
 
     public readonly static string GETALL = "SELECT Id, Street, PostalCode, District, StreetType, AdditionalInfo, Number, State, City FROM Address";
 
@@ -14,8 +14,7 @@ public class Address
 
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public string _id { get; set; }
-    public int Id { get; set; }
+    public string Id { get; set; }
     public string Street { get; set; }
     public string PostalCode { get; set; }
     public string District { get; set; }

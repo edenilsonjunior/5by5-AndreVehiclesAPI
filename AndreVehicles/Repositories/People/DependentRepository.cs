@@ -34,7 +34,7 @@ public class DependentRepository
 
             Address address = new()
             {
-                Id = Convert.ToInt32(reader["Id"]),
+                Id = reader["Id"].ToString(),
                 Street = reader["Street"].ToString(),
                 PostalCode = reader["PostalCode"].ToString(),
                 District = reader["District"].ToString(),
@@ -78,7 +78,7 @@ public class DependentRepository
 
             Address address = new()
             {
-                Id = Convert.ToInt32(reader["Id"]),
+                Id = reader["Id"].ToString(),
                 Street = reader["Street"].ToString(),
                 PostalCode = reader["PostalCode"].ToString(),
                 District = reader["District"].ToString(),

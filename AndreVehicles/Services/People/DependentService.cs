@@ -20,7 +20,7 @@ public class DependentService
 
     public bool Post(Dependent dependent)
     {
-        dependent.Address.Id = _addressRepository.Post("ado", dependent.Address);
+         _addressRepository.Post("ado", dependent.Address);
         return _repository.Post(dependent);
     }
 }

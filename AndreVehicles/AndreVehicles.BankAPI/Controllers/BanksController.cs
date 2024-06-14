@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Models.Financials;
+using Models.People;
 using Services.Financials;
 
 namespace AndreVehicles.BankAPI.Controllers;
@@ -44,4 +45,14 @@ public class BanksController : ControllerBase
 
         return CreatedAtRoute("GetBank", new { cnpj = bank.Cnpj }, bank);
     }
+
+
+    [HttpGet("/GetBankByCnpj/{cnpj}")]
+    public ActionResult<Bank> GetBankByCnpj(string cnpj)
+    {
+        var bank = _bankService.Get(cnpj);
+
+        return bank != null ? Ok(bank) : NotFound();
+    }
+
 }

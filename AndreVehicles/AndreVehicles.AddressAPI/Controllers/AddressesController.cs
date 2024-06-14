@@ -130,9 +130,9 @@ public class AddressesController : ControllerBase
 
     private async Task<ActionResult<Address>> PostWithDapperOrAdo(string technology, Address address)
     {
-        address.Id = _service.Post(technology, address);
+        bool sucess = _service.Post(technology, address);
 
-        if (address.Id != -1)
+        if (sucess)
             return CreatedAtAction("GetAddress", new { technology, id = address.Id }, address);
         else
             return BadRequest("Failed to insert Address.");

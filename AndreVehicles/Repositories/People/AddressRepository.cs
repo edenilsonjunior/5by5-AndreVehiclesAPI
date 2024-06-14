@@ -39,7 +39,7 @@ public class AddressRepository
                 {
                     Address address = new Address
                     {
-                        Id = Convert.ToInt32(reader["Id"]),
+                        Id = reader["Id"].ToString(),
                         Street = reader["Street"].ToString(),
                         PostalCode = reader["PostalCode"].ToString(),
                         District = reader["District"].ToString(),
@@ -86,7 +86,7 @@ public class AddressRepository
 
                 if (reader.Read())
                 {
-                    address.Id = Convert.ToInt32(reader["Id"]);
+                    address.Id = reader["Id"].ToString();
                     address.Street = reader["Street"].ToString();
                     address.PostalCode = reader["PostalCode"].ToString();
                     address.District = reader["District"].ToString();
@@ -107,11 +107,11 @@ public class AddressRepository
         return null;    
     }
 
-    public int Post(string technology, Address address)
+    public bool Post(string technology, Address address)
     {
         if (technology.Equals("dapper"))
         {
-            return DapperUtilsRepository<Address>.InsertWithScalar(Address.POST, address);
+            return DapperUtilsRepository<Address>.Insert(Address.POST, address);
         }
 
         if (technology.Equals("ado"))
@@ -122,6 +122,7 @@ public class AddressRepository
 
                 SqlCommand command = new(Address.POST, connection);
 
+                command.Parameters.AddWithValue("@Id", address.Id);
                 command.Parameters.AddWithValue("@Street", address.Street);
                 command.Parameters.AddWithValue("@PostalCode", address.PostalCode);
                 command.Parameters.AddWithValue("@District", address.District);
@@ -133,16 +134,15 @@ public class AddressRepository
 
                 connection.Open();
 
-                int id = (int)command.ExecuteScalar();
+                return command.ExecuteNonQuery() > 0;
 
-                return id;
             }
             catch (Exception)
             {
-                return -1;
+                return false;
             }
         }
-        return -1;
+        return false;
     }
 
 

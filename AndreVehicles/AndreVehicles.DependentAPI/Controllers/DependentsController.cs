@@ -69,6 +69,9 @@ public class DependentsController : ControllerBase
             return BadRequest($"Failed to retrieve address.");
         }
 
+        address = new AddressService().PostMongo(address);
+
+
         if (address == null)
             return BadRequest("Address not found.");
 
