@@ -66,7 +66,7 @@ namespace AndreVehicles.Test
         }
 
         [Fact]
-        public void GetByPlateTest()
+        public void GetByPlateEntityTest()
         {
             InitializeDataBase();
 
@@ -75,6 +75,36 @@ namespace AndreVehicles.Test
                 var controller = new CarsController(context);
 
                 Car result = controller.GetCar("entity", "ABC1234").Result.Value;
+
+                Assert.Equal("ABC1234", result.Plate);
+            }
+        }
+
+        [Fact]
+        public void GetByPlateDapperTest()
+        {
+            InitializeDataBase();
+
+            using (var context = new AndreVehiclesCarAPIContext(options))
+            {
+                var controller = new CarsController(context);
+
+                Car result = controller.GetCar("dapper", "ABC1234").Result.Value;
+
+                Assert.Equal("ABC1234", result.Plate);
+            }
+        }
+
+        [Fact]
+        public void GetByPlateAdoTest()
+        {
+            InitializeDataBase();
+
+            using (var context = new AndreVehiclesCarAPIContext(options))
+            {
+                var controller = new CarsController(context);
+
+                Car result = controller.GetCar("ado", "ABC1234").Result.Value;
 
                 Assert.Equal("ABC1234", result.Plate);
             }

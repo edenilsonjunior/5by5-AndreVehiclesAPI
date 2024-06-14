@@ -12,6 +12,7 @@ using Models.People;
 using System.Runtime.ConstrainedExecution;
 using Models.DTO.People;
 using Services.People;
+using Microsoft.Data.SqlClient;
 
 namespace AndreVehicles.FinancialPendingAPI.Controllers
 {
@@ -61,10 +62,17 @@ namespace AndreVehicles.FinancialPendingAPI.Controllers
         public async Task<ActionResult<FinancialPending>> PostFinancialPending(FinancialPendingDTO financialPendingDTO)
         {
 
+            Customer customer = await GetCustomer(financialPendingDTO.CustomerDocument);
+
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
             FinancialPending financialPending = new()
             {
                 Description = financialPendingDTO.Description,
-                Customer =  await GetCustomer(financialPendingDTO.CustomerDocument),
+                Customer =  customer,
                 Price = financialPendingDTO.Price,
                 FinancialPendingDate = financialPendingDTO.FinancialPendingDate,
                 PaymentDate = financialPendingDTO.PaymentDate,
@@ -75,10 +83,27 @@ namespace AndreVehicles.FinancialPendingAPI.Controllers
               {
                   return Problem("Entity set 'AndreVehiclesFinancialPendingAPIContext.FinancialPending'  is null.");
               }
-            _context.FinancialPendings.Add(financialPending);
-            await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetFinancialPending", new { id = financialPending.Id }, financialPending);
+            var parameters = new[]
+            {
+                new SqlParameter("@Description", financialPending.Description),
+                new SqlParameter("@CustomerDocument", financialPending.Customer.Document),
+                new SqlParameter("@Price", financialPending.Price),
+                new SqlParameter("@FinancialPendingDate", financialPending.FinancialPendingDate),
+                new SqlParameter("@PaymentDate", financialPending.PaymentDate),
+                new SqlParameter("@Status", financialPending.Status)
+            };
+
+            int sucess = await _context.Database.ExecuteSqlRawAsync(FinancialPending.POST, parameters);
+
+            if(sucess > 0)
+            {
+                return CreatedAtAction("GetFinancialPending", new { id = financialPending.Id }, financialPending);
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
 
         private async Task<Customer> GetCustomer(string document)
@@ -88,7 +113,7 @@ namespace AndreVehicles.FinancialPendingAPI.Controllers
             try
             {
                 using HttpClient client = new();
-                client.BaseAddress = new Uri("https://localhost:7063/api/Customers/entity");
+                client.BaseAddress = new Uri("https://localhost:7063/api/Customers/");
 
                 HttpResponseMessage response = await client.GetAsync($"entity/{document}");
 
