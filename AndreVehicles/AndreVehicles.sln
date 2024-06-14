@@ -35,13 +35,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AndreVehicles.BankAPI", "An
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AndreVehicles.FinancialPendingAPI", "AndreVehicles.FinancialPendingAPI\AndreVehicles.FinancialPendingAPI.csproj", "{F4B2ED95-D228-461A-A6CD-76A21250F08D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndreVehicles.Test", "AndreVehicles.Test\AndreVehicles.Test.csproj", "{2AE87D6A-DD69-4550-B898-90323B22E92E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AndreVehicles.Test", "AndreVehicles.Test\AndreVehicles.Test.csproj", "{2AE87D6A-DD69-4550-B898-90323B22E92E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndreVehicles.CarFinancingAPI", "AndreVehicles.CarFinancingAPI\AndreVehicles.CarFinancingAPI.csproj", "{1E6616C7-07DB-48BC-92D5-8755FEF75298}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AndreVehicles.CarFinancingAPI", "AndreVehicles.CarFinancingAPI\AndreVehicles.CarFinancingAPI.csproj", "{1E6616C7-07DB-48BC-92D5-8755FEF75298}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndreVehicles.DriverAPI", "AndreVehicles.DriverAPI\AndreVehicles.DriverAPI.csproj", "{24174565-8941-44CB-AAE7-C1BD7B5D6DDF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndreVehicles.InsuranceAPI", "AndreVehicles.InsuranceAPI\AndreVehicles.InsuranceAPI.csproj", "{FC1B6090-FCD6-4155-AE1E-C9BA14EABE8A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndreVehicles.BankConsumer", "AndreVehicles.BankConsumer\AndreVehicles.BankConsumer.csproj", "{BC1C4ACC-4EA2-4801-BAE3-65B001AEDFB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -129,6 +131,10 @@ Global
 		{FC1B6090-FCD6-4155-AE1E-C9BA14EABE8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC1B6090-FCD6-4155-AE1E-C9BA14EABE8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC1B6090-FCD6-4155-AE1E-C9BA14EABE8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC1C4ACC-4EA2-4801-BAE3-65B001AEDFB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC1C4ACC-4EA2-4801-BAE3-65B001AEDFB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC1C4ACC-4EA2-4801-BAE3-65B001AEDFB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC1C4ACC-4EA2-4801-BAE3-65B001AEDFB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

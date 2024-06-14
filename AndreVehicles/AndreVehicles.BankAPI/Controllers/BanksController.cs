@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Models.Financials;
-using Models.People;
+using Newtonsoft.Json;
+using RabbitMQ.Client;
 using Services.Financials;
+using System.Text;
 
 namespace AndreVehicles.BankAPI.Controllers;
 
@@ -9,50 +11,73 @@ namespace AndreVehicles.BankAPI.Controllers;
 [ApiController]
 public class BanksController : ControllerBase
 {
-    private BankService _bankService;
 
-    public BanksController(BankService bankService)
+    private readonly ConnectionFactory _factory;
+    const string QUEUE_NAME = "BankQueue";
+
+    public BanksController(ConnectionFactory factory)
     {
-        _bankService = bankService;
+        _factory = factory;
     }
 
+    /*
+        [HttpGet]
+        public ActionResult<List<Bank>> Get()
+        {
+            var bankList = _bankService.Get();
+            if (bankList == null)
+                return NotFound();
 
-    [HttpGet]
-    public ActionResult<List<Bank>> Get()
-    {
-        var bankList = _bankService.Get();
-        if (bankList == null)
-            return NotFound();
 
+            return bankList;
+        }
 
-        return bankList;
-    }
+        [HttpGet("{cnpj}", Name = "GetBank")]
+        public ActionResult<Bank> Get(string cnpj)
+        {
+            var bank = _bankService.Get(cnpj);
+            if (bank == null)
+                return NotFound();
 
-    [HttpGet("{cnpj}", Name = "GetBank")]
-    public ActionResult<Bank> Get(string cnpj)
-    {
-        var bank = _bankService.Get(cnpj);
-        if (bank == null)
-            return NotFound();
-
-        return bank;
-    }
+            return bank;
+        }*/
 
     [HttpPost]
-    public ActionResult<Bank> Create(Bank bank)
+    public ActionResult<Bank> Post(Bank bank)
     {
-        _bankService.Create(bank);
+        // acting as a producer
+        using (var connection = _factory.CreateConnection())
+        {
+            using var channel = connection.CreateModel();
 
-        return CreatedAtRoute("GetBank", new { cnpj = bank.Cnpj }, bank);
+            channel.QueueDeclare(
+                queue: QUEUE_NAME,
+                durable: false,
+                exclusive: false,
+                autoDelete: false,
+                arguments: null
+                );
+
+            var stringFieldBank = JsonConvert.SerializeObject(bank);
+            var bytesBank = Encoding.UTF8.GetBytes(stringFieldBank);
+
+            channel.BasicPublish(
+                exchange: "",
+                routingKey: QUEUE_NAME,
+                basicProperties: null,
+                body: bytesBank
+                );
+        }
+        return Accepted();
     }
 
+    /*
+        [HttpGet("/GetBankByCnpj/{cnpj}")]
+        public ActionResult<Bank> GetBankByCnpj(string cnpj)
+        {
+            var bank = _bankService.Get(cnpj);
 
-    [HttpGet("/GetBankByCnpj/{cnpj}")]
-    public ActionResult<Bank> GetBankByCnpj(string cnpj)
-    {
-        var bank = _bankService.Get(cnpj);
-
-        return bank != null ? Ok(bank) : NotFound();
-    }
+            return bank != null ? Ok(bank) : NotFound();
+        }*/ 
 
 }
