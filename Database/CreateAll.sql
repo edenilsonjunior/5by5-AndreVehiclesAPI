@@ -245,3 +245,17 @@ CREATE TABLE Sale(
     CONSTRAINT fk_sale_car FOREIGN KEY (CarPlate) REFERENCES Car(Plate),
     CONSTRAINT fk_sale_payment FOREIGN KEY (PaymentId) REFERENCES Payment(Id)
 );
+
+CREATE TABLE Insurance(
+
+    Id INT IDENTITY(1,1) NOT NULL,
+    CustomerDocument NVARCHAR(14) NOT NULL,
+    Deductible NVARCHAR(255) NOT NULL,
+    CarPlate NVARCHAR(8) NOT NULL,
+    MainDriverDocument NVARCHAR(14) NOT NULL
+
+    CONSTRAINT pk_insurance PRIMARY KEY (Id),
+    CONSTRAINT fk_insurance_customer FOREIGN KEY (CustomerDocument) REFERENCES Customer(Document),
+    CONSTRAINT fk_insurance_car FOREIGN KEY (CarPlate) REFERENCES Car(Plate),
+    CONSTRAINT fk_insurance_main_driver FOREIGN KEY (MainDriverDocument) REFERENCES Person(Document)
+);
