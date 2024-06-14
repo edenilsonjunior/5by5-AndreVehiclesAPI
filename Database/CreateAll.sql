@@ -256,9 +256,6 @@ CREATE TABLE Bank(
 );
 
 
-
---"INSERT INTO CarFinancing (SaleId, FinancingDate, BankCnpj) VALUES (@SaleId, @FinancingDate, @BankCnpj); CAST (SCOPE_IDENTITY() as int)";
-
 CREATE TABLE CarFinancing(
 
     Id INT IDENTITY(1,1) NOT NULL,
@@ -270,3 +267,4 @@ CREATE TABLE CarFinancing(
     CONSTRAINT fk_carFinancing_sale FOREIGN KEY (SaleId) REFERENCES Sale(Id)/*,
     CONSTRAINT fk_carFinancing_bank FOREIGN KEY (BankCnpj) REFERENCES Bank(Cnpj),*/
 );
+

@@ -1,4 +1,5 @@
 ﻿using Models.People;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models.Insurances;
 

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Models.Cars;
 using Models.Financials;
+using Models.Insurances;
 using Models.People;
 using Models.Sales;
 
@@ -118,6 +119,18 @@ namespace AndreVehicles.CarAPI.Data
                 entity.ToTable("Dependent");
             });
 
+            modelBuilder.Entity<Driver>(entity =>
+            {
+                entity.ToTable("Driver");
+            });
+
+            modelBuilder.Entity<DriversLicense>(entity =>
+            {
+                entity.ToTable("DriversLicense");
+                entity.HasKey(dl => dl.License);
+                entity.Property(dl => dl.License)
+                    .ValueGeneratedNever();
+            });
         }
 
         private void CreateSalesBuilder(ModelBuilder modelBuilder)

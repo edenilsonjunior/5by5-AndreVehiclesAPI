@@ -73,6 +73,19 @@ namespace AndreVehicles.CarAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DriversLicenseCategory",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DriversLicenseCategory", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Operation",
                 columns: table => new
                 {
@@ -151,6 +164,29 @@ namespace AndreVehicles.CarAPI.Migrations
                         column: x => x.CarPlate,
                         principalTable: "Car",
                         principalColumn: "Plate",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DriversLicense",
+                columns: table => new
+                {
+                    License = table.Column<long>(type: "bigint", nullable: false),
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Rg = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Cpf = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MotherName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FatherName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CategoryId = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DriversLicense", x => x.License);
+                    table.ForeignKey(
+                        name: "FK_DriversLicense_DriversLicenseCategory_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "DriversLicenseCategory",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -241,6 +277,29 @@ namespace AndreVehicles.CarAPI.Migrations
                         principalTable: "Role",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Driver",
+                columns: table => new
+                {
+                    Document = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    License1 = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Driver", x => x.Document);
+                    table.ForeignKey(
+                        name: "FK_Driver_DriversLicense_License1",
+                        column: x => x.License1,
+                        principalTable: "DriversLicense",
+                        principalColumn: "License",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Driver_Person_Document",
+                        column: x => x.Document,
+                        principalTable: "Person",
+                        principalColumn: "Document");
                 });
 
             migrationBuilder.CreateTable(
@@ -379,6 +438,16 @@ namespace AndreVehicles.CarAPI.Migrations
                 column: "CustomerDocument");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Driver_License1",
+                table: "Driver",
+                column: "License1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DriversLicense_CategoryId",
+                table: "DriversLicense",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Employee_RoleId",
                 table: "Employee",
                 column: "RoleId");
@@ -448,6 +517,9 @@ namespace AndreVehicles.CarAPI.Migrations
                 name: "Dependent");
 
             migrationBuilder.DropTable(
+                name: "Driver");
+
+            migrationBuilder.DropTable(
                 name: "FinancialPending");
 
             migrationBuilder.DropTable(
@@ -460,6 +532,9 @@ namespace AndreVehicles.CarAPI.Migrations
                 name: "Operation");
 
             migrationBuilder.DropTable(
+                name: "DriversLicense");
+
+            migrationBuilder.DropTable(
                 name: "Car");
 
             migrationBuilder.DropTable(
@@ -470,6 +545,9 @@ namespace AndreVehicles.CarAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Payment");
+
+            migrationBuilder.DropTable(
+                name: "DriversLicenseCategory");
 
             migrationBuilder.DropTable(
                 name: "Person");
