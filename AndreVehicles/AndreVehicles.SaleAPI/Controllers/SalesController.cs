@@ -144,8 +144,6 @@ public class SalesController : ControllerBase
 
                 int sucess = await _context.Database.ExecuteSqlRawAsync(Sale.POST, parameters);
 
-                _context.Sale.Add(sale);
-                await _context.SaveChangesAsync();
 
                 if (sucess > 0)
                     return CreatedAtAction("GetSale", new { technology, id = sale.Id }, sale);
@@ -172,7 +170,7 @@ public class SalesController : ControllerBase
                     SalePrice = saleDTO.SalePrice
                 };
                 bool success = _service.Post(technology, sale);
-                return success ? CreatedAtAction("GetSale", new { id = sale.Id }, sale) : BadRequest();
+                return success ? CreatedAtAction("GetSale", new { technology, id = sale.Id }, sale) : BadRequest();
 
             default:
                 return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");
