@@ -94,12 +94,12 @@ namespace AndreVehicles.InsuranceAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Insurance>> PostInsurance(InsuranceDTO insuranceDTO)
         {
-            Customer costumer = await ApiConsume<Customer>.Get("https://localhost:7063/api/Customers/entity/", $"{insuranceDTO.CustomerDocument}");
+            Customer costumer = await ApiConsume<Customer>.Get("https://localhost:7063/api/Customers/dapper/", $"{insuranceDTO.CustomerDocument}");
 
             if (costumer == null)
                 return BadRequest("Customer not found.");
 
-            Car car = await ApiConsume<Car>.Get("https://localhost:7274/api/Cars/entity/", $"{insuranceDTO.CarPlate}");
+            Car car = await ApiConsume<Car>.Get("https://localhost:7274/api/Cars/dapper/", $"{insuranceDTO.CarPlate}");
 
             if (car == null)
                 return BadRequest("Car not found.");

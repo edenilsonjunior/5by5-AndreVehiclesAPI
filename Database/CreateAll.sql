@@ -282,6 +282,6 @@ CREATE TABLE Insurance(
 
     CONSTRAINT pk_insurance PRIMARY KEY (Id),
     CONSTRAINT fk_insurance_customer FOREIGN KEY (CustomerDocument) REFERENCES Customer(Document),
-    CONSTRAINT fk_insurance_car FOREIGN KEY (CarPlate) REFERENCES Car(Plate),
-    CONSTRAINT fk_insurance_main_driver FOREIGN KEY (MainDriverDocument) REFERENCES Person(Document)
+    CONSTRAINT fk_insurance_car FOREIGN KEY (CarPlate) REFERENCES Car(Plate)/*,
+    CONSTRAINT fk_insurance_main_driver FOREIGN KEY (MainDriverDocument) REFERENCES Person(Document)*/
 );

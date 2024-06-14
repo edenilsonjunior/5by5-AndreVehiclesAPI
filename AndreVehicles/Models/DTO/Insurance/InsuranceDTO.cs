@@ -15,6 +15,6 @@ namespace Models.DTO.Insurance
         public string CustomerDocument { get; set; }
         public string Deductible { get; set; }
         public string CarPlate { get; set; }
-        public long MainDriverDocument { get; set; }
+        public string MainDriverDocument { get; set; }
     }
 }
