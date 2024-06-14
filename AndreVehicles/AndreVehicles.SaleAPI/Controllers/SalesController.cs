@@ -1,13 +1,16 @@
 ﻿using AndreVehicles.SaleAPI.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Models.Cars;
 using Models.DTO.Sales;
 using Models.People;
 using Models.Sales;
+using Repositories;
 using Services.Cars;
 using Services.People;
 using Services.Sales;
+using System.Diagnostics;
 
 namespace AndreVehicles.SaleAPI.Controllers;
 
@@ -40,8 +43,19 @@ public class SalesController : ControllerBase
         switch (technology)
         {
             case "entity":
-                return _context.Sale == null ? NotFound() : await _context.Sale.Include(c => c.Customer).Include(e => e.Employee).Include(p => p.Payment).ToListAsync();
 
+                return  await _context.Sale
+                    .Include(c => c.Customer)
+                    .Include(c => c.Customer.Address)
+                    .Include(c => c.Employee)
+                    .Include(c => c.Employee.Address)
+                    .Include(c => c.Employee.Role)
+                    .Include(p => p.Payment)
+                    .Include(p => p.Payment.BankSlip)
+                    .Include(p => p.Payment.Pix)
+                    .Include(p => p.Payment.Pix.Type)
+                    .Include(p => p.Payment.Card)
+                    .ToListAsync();
             case "dapper":
             case "ado":
                 var sales = _service.Get(technology);
@@ -64,6 +78,7 @@ public class SalesController : ControllerBase
                     return NotFound();
 
                 sale = await _context.Sale.Include(c => c.Customer).Include(e => e.Employee).Include(p => p.Payment).SingleOrDefaultAsync(s => s.Id == id);
+
                 return sale != null ? sale : NotFound();
 
             case "dapper":
@@ -81,21 +96,27 @@ public class SalesController : ControllerBase
     public async Task<ActionResult<Sale>> PostSale(string technology, SaleDTO saleDTO)
     {
         Sale sale;
-        Car car;
-        Employee employee;
-        Customer customer;
-        Payment payment;
+        Car? car;
+        Employee? employee;
+        Customer? customer;
+        Payment? payment;
 
         switch (technology)
         {
             case "entity":
 
-                car = _context.Car.FirstOrDefault(c => c.Plate == saleDTO.CarPlate);
+                var employeeTask = ApiConsume<Employee>.Get("https://localhost:7296/api/Employees/", $"entity/{saleDTO.EmployeeDocument}");
+                var customerTask = ApiConsume<Customer>.Get("https://localhost:7063/api/Customers/", $"entity/{saleDTO.CustomerDocument}");
+                var paymentTask = ApiConsume<Payment>.Get("https://localhost:7255/api/Payments/", $"entity/{saleDTO.PaymentId}");
+                var carTask = ApiConsume<Car>.Get("https://localhost:7274/api/Cars/", $"entity/{saleDTO.CarPlate}");
 
-                employee = _context.Employee.FirstOrDefault(e => e.Document == saleDTO.EmployeeDocument);
+                Task.WaitAll(employeeTask, customerTask, paymentTask, carTask);
 
-                customer = _context.Customer.FirstOrDefault(c => c.Document == saleDTO.CustomerDocument);
-                payment = _context.Payment.FirstOrDefault(p => p.Id == saleDTO.PaymentId);
+                employee = employeeTask.Result;
+                customer = customerTask.Result;
+                payment = paymentTask.Result;
+                car = carTask.Result;
+
 
                 if (car == null || employee == null || customer == null || payment == null)
                     return BadRequest("Invalid car, employee, customer or payment.");
@@ -110,12 +131,26 @@ public class SalesController : ControllerBase
                     SalePrice = saleDTO.SalePrice
                 };
 
-                _context.Sale.Add(sale);
-                await _context.SaveChangesAsync();
-                return CreatedAtAction("GetSale", new { id = sale.Id }, sale);
 
-            case "dapper":
-            case "ado":
+                var parameters = new[]
+                {
+                    new SqlParameter("@CustomerDocument", sale.Customer.Document),
+                    new SqlParameter("@EmployeeDocument", sale.Employee.Document),
+                    new SqlParameter("@CarPlate", sale.Car.Plate),
+                    new SqlParameter("@PaymentId", sale.Payment.Id),
+                    new SqlParameter("@SaleDate", sale.Customer.Document),
+                    new SqlParameter("@SalePrice", sale.SalePrice)
+                };
+
+                int sucess = await _context.Database.ExecuteSqlRawAsync(Sale.POST, parameters);
+
+
+                if (sucess > 0)
+                    return CreatedAtAction("GetSale", new { technology, id = sale.Id }, sale);
+                else
+                    return BadRequest();
+
+            case "dapper" or "ado":
 
                 car = _carService.Get(technology, saleDTO.CarPlate);
                 employee = _employeeService.Get(technology, saleDTO.EmployeeDocument);
@@ -135,7 +170,7 @@ public class SalesController : ControllerBase
                     SalePrice = saleDTO.SalePrice
                 };
                 bool success = _service.Post(technology, sale);
-                return success ? CreatedAtAction("GetSale", new { id = sale.Id }, sale) : BadRequest();
+                return success ? CreatedAtAction("GetSale", new { technology, id = sale.Id }, sale) : BadRequest();
 
             default:
                 return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");
@@ -143,61 +178,69 @@ public class SalesController : ControllerBase
     }
 
 
-    /*
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutSale(int id, Sale sale)
-    {
-        if (id != sale.Id)
-        {
-            return BadRequest();
-        }
 
-        _context.Entry(sale).State = EntityState.Modified;
+    [HttpGet("/GetSaleById/{technology}/{id}")]
+    public Sale? GetSaleById(string technology, int id)
+    {
+        var sale = _service.Get(technology, id);
+        return sale;
+    }
+
+
+
+
+
+
+    private async Task<Customer> GetCustomer(string document)
+    {
+        Customer? customer;
 
         try
         {
-            await _context.SaveChangesAsync();
+            using HttpClient client = new();
+            client.BaseAddress = new Uri("https://localhost:7063/api/Customers/");
+
+            HttpResponseMessage response = await client.GetAsync($"entity/{document}");
+
+            response.EnsureSuccessStatusCode();
+            customer = await response.Content.ReadFromJsonAsync<Customer>();
         }
-        catch (DbUpdateConcurrencyException)
+        catch (Exception)
         {
-            if (!SaleExists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
+            return null;
         }
 
-        return NoContent();
+        if (customer == null)
+            return null;
+
+        return customer;
     }
 
-
-    // DELETE: api/Sales/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteSale(int id)
+    private async Task<Employee?> GetEmployee(string document)
     {
-        if (_context.Sale == null)
+        Employee? employee;
+
+        try
         {
-            return NotFound();
+            using HttpClient client = new();
+            client.BaseAddress = new Uri("https://localhost:7296/api/Employees/");
+
+            HttpResponseMessage response = await client.GetAsync($"entity/{document}");
+
+            response.EnsureSuccessStatusCode();
+            employee = await response.Content.ReadFromJsonAsync<Employee>();
         }
-        var sale = await _context.Sale.FindAsync(id);
-        if (sale == null)
+        catch (Exception)
         {
-            return NotFound();
+            return null;
         }
 
-        _context.Sale.Remove(sale);
-        await _context.SaveChangesAsync();
+        if (employee == null)
+            return null;
 
-        return NoContent();
+        return employee;
     }
-    */
 
 
-    private bool SaleExists(int id)
-    {
-        return (_context.Sale?.Any(e => e.Id == id)).GetValueOrDefault();
-    }
+
 }

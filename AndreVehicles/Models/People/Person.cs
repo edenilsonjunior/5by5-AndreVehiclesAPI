@@ -3,7 +3,7 @@
 namespace Models.People;
 
 
-public abstract class Person
+public class Person
 {
     public readonly static string INSERT = "INSERT INTO Person (Document, Name, BirthDate, AddressId, Phone, Email) VALUES (@Document, @Name, @BirthDate, @AddressId, @Phone, @Email);";
 

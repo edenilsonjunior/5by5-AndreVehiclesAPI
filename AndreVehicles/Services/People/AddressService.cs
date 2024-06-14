@@ -31,7 +31,7 @@ public class AddressService
     }
 
 
-    public int Post(string technology, Address address)
+    public bool Post(string technology, Address address)
     {
         address.PostalCode = address.PostalCode.Replace("-", "");
         return _addressRepository.Post(technology, address);

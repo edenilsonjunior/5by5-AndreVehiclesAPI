@@ -1,19 +1,23 @@
 ﻿using Microsoft.Data.SqlClient;
 using Models.Sales;
-using System.Configuration;
+using System.Data;
 
 namespace Repositories.Sales;
 
 public class PaymentRepository
 {
-    private string _connectionString;
+    private readonly string _connectionString;
+    private readonly AdoUtilsRepository _adoUtils;
 
     public PaymentRepository()
     {
         _connectionString = "Data Source=127.0.0.1; Initial Catalog=DBAndreVehicles; User Id=sa; Password=SqlServer2019!; TrustServerCertificate=Yes";
+        _adoUtils = new AdoUtilsRepository();
     }
 
-    public List<Payment> Get(string technology)
+
+    // Get all and get by id
+    public List<Payment>? Get(string technology)
     {
         if (technology.Equals("dapper"))
         {
@@ -32,84 +36,29 @@ public class PaymentRepository
                     bankSlip = new(row.BankSlipId, row.BankSlipNumber, row.BankSlipDueDate);
 
                 if (row.PixId != null)
-                {
-                    pix = new()
-                    {
-                        Id = row.PixId,
-                        PixKey = row.PixKey,
-                        Type = new()
-                        {
-                            Id = row.PixTypeId,
-                            Name = row.PixTypeName
-                        }
-                    };
-                }
+                    pix = RetrievePix(row);
 
                 var payment = new Payment(row.Id, card, bankSlip, pix, row.PaymentDate);
                 list.Add(payment);
             }
             return list;
         }
-
-        if (technology.Equals("ado"))
+        else if (technology.Equals("ado"))
         {
-            SqlConnection sqlConnection = new SqlConnection(_connectionString);
-            SqlCommand sqlCommand = new SqlCommand(Payment.GETALL, sqlConnection);
+            DataTable dataTable = _adoUtils.ExecuteReader(Payment.GETALL, new()).Result;
 
-            List<Payment> list = new List<Payment>();
+            if (dataTable.Rows.Count == 0) return null;
 
-            try
+            var list = new List<Payment>();
+
+            foreach (DataRow row in dataTable.Rows)
             {
-                sqlConnection.Open();
-                SqlDataReader reader = sqlCommand.ExecuteReader();
+                var card = RetrieveCard(row);
+                var pix = RetrievePix(row);
+                var bankSlip = RetrieveBankSlip(row);
 
-                while (reader.Read())
-                {
-                    Card? card = null;
-                    Pix? pix = null;
-                    BankSlip? bankSlip = null;
-
-                    if (reader["CardNumber"] != DBNull.Value)
-                    {
-                        card = new Card()
-                        {
-                            CardNumber = reader["CardNumber"].ToString(),
-                            SecurityCode = reader["SecurityCode"].ToString(),
-                            ExpirationDate = reader["ExpirationDate"].ToString(),
-                            CardHolderName = reader["CardHolderName"].ToString()
-                        };
-                    }
-
-                    if (reader["BankSlipId"] != DBNull.Value)
-                    {
-                        bankSlip = new()
-                        {
-                            Id = Convert.ToInt32(reader["BankSlipId"]),
-                            Number = Convert.ToInt32(reader["BankSlipNumber"]),
-                            DueDate = Convert.ToDateTime(reader["BankSlipDueDate"])
-                        };
-                    }
-                    if (reader["PixId"] != DBNull.Value)
-                    {
-                        pix = new Pix
-                        {
-                            Id = Convert.ToInt32(reader["PixId"]),
-                            PixKey = reader["PixKey"].ToString(),
-                            Type = new PixType
-                            {
-                                Id = Convert.ToInt32(reader["PixTypeId"]),
-                                Name = reader["PixTypeName"].ToString()
-                            }
-                        };
-                    }
-
-                    Payment payment = new Payment(Convert.ToInt32(reader["Id"]), card, bankSlip, pix, Convert.ToDateTime(reader["PaymentDate"]));
-                    list.Add(payment);
-                }
-            }
-            catch (Exception)
-            {
-                return null;
+                Payment payment = new(Convert.ToInt32(row["Id"]), card, bankSlip, pix, Convert.ToDateTime(row["PaymentDate"]));
+                list.Add(payment);
             }
             return list;
         }
@@ -118,13 +67,11 @@ public class PaymentRepository
 
     public Payment Get(string technology, int id)
     {
-
         if (technology.Equals("dapper"))
         {
             dynamic data = DapperUtilsRepository<Payment>.Get(Payment.GET, new { Id = id });
 
-            if (data == null)
-                return null;
+            if (data == null) return null;
 
             Card? card = null;
             Pix? pix = null;
@@ -137,191 +84,190 @@ public class PaymentRepository
                 bankSlip = new(data.BankSlipId, data.BankSlipNumber, data.BankSlipDueDate);
 
             if (data.PixId != null)
-            {
-                pix = new()
-                {
-                    Id = data.PixId,
-                    PixKey = data.PixKey,
-                    Type = new()
-                    {
-                        Id = data.PixTypeId,
-                        Name = data.PixTypeName
-                    }
-                };
-            }
+                pix = RetrievePix(data);
 
             return new Payment(data.Id, card, bankSlip, pix, data.PaymentDate);
         }
 
         if (technology.Equals("ado"))
         {
-            SqlConnection sqlConnection = new SqlConnection(_connectionString);
-            SqlCommand sqlCommand = new SqlCommand(Payment.GET, sqlConnection);
-            sqlCommand.Parameters.AddWithValue("@Id", id);
+            DataTable dataTable = _adoUtils.ExecuteReader(Payment.GET, new() { new("Id", id) }).Result;
 
-            var reader = sqlCommand.ExecuteReader();
-
-            if (reader.HasRows)
-            {
-                Card? card = null;
-                Pix? pix = null;
-                BankSlip? bankSlip = null;
-
-
-                if (reader["CardNumber"] != DBNull.Value)
-                {
-                    card = new Card()
-                    {
-                        CardNumber = reader["CardNumber"].ToString(),
-                        SecurityCode = reader["SecurityCode"].ToString(),
-                        ExpirationDate = reader["ExpirationDate"].ToString(),
-                        CardHolderName = reader["CardHolderName"].ToString()
-                    };
-                }
-
-                if (reader["BankSlipId"] != DBNull.Value)
-                {
-                    bankSlip = new()
-                    {
-                        Id = Convert.ToInt32(reader["BankSlipId"]),
-                        Number = Convert.ToInt32(reader["BankSlipNumber"]),
-                        DueDate = Convert.ToDateTime(reader["BankSlipDueDate"])
-                    };
-                }
-                if (reader["PixId"] != DBNull.Value)
-                {
-                    pix = new Pix
-                    {
-                        Id = Convert.ToInt32(reader["PixId"]),
-                        PixKey = reader["PixKey"].ToString(),
-                        Type = new PixType
-                        {
-                            Id = Convert.ToInt32(reader["PixTypeId"]),
-                            Name = reader["PixTypeName"].ToString()
-                        }
-                    };
-                }
-
-                return new Payment(Convert.ToInt32(reader["Id"]), card, bankSlip, pix, Convert.ToDateTime(reader["PaymentDate"]));
-
-            }
-            else
-            {
+            if (dataTable.Rows.Count == 0)
                 return null;
-            }
 
+            DataRow row = dataTable.Rows[0];
+
+            var card = RetrieveCard(row);
+            var pix = RetrievePix(row);
+            var bankSlip = RetrieveBankSlip(row);
+
+            return new Payment(Convert.ToInt32(row["Id"]), card, bankSlip, pix, Convert.ToDateTime(row["PaymentDate"]));
         }
 
         return null;
     }
 
+
+
+    // Post methods
     public bool Post(string technology, Payment payment)
     {
-        object obj;
-
-        if (technology.Equals("dapper"))
+        return technology switch
         {
-            if (payment.Pix != null)
+            "dapper" => InsertPaymentDapper(payment),
+            "ado" => InsertPaymentAdo(payment),
+            _ => false,
+        };
+    }
+
+
+    // Post aux methods
+    private bool InsertPaymentDapper(Payment payment)
+    {
+        if (payment.Pix != null)
+        {
+            payment.Pix.Type.Id = DapperUtilsRepository<PixType>.InsertWithScalar(PixType.INSERT, new { payment.Pix.Type.Name });
+
+
+            object pix = new
             {
-                obj = new
-                {
-                    PixKey = payment.Pix.PixKey,
-                    Type = payment.Pix.Type.Id
-                };
-
-                DapperUtilsRepository<Pix>.Insert(Pix.POST, payment.Pix);
-            }
-
-            if (payment.BankSlip != null)
-            {
-                obj = new
-                {
-                    Number = payment.BankSlip.Number,
-                    DueDate = payment.BankSlip.DueDate
-                };
-
-                DapperUtilsRepository<BankSlip>.Insert(BankSlip.POST, payment.BankSlip);
-            }
-
-            if (payment.Card != null)
-            {
-                obj = new
-                {
-                    CardNumber = payment.Card.CardNumber,
-                    SecurityCode = payment.Card.SecurityCode,
-                    ExpirationDate = payment.Card.ExpirationDate,
-                    CardHolderName = payment.Card.CardHolderName
-                };
-
-                DapperUtilsRepository<Card>.Insert(Card.POST, payment.Card);
-            }
-
-            obj = new
-            {
-                CardNumber = payment.Card?.CardNumber,
-                BankSlipId = payment.BankSlip?.Id,
-                PixId = payment.Pix?.Id,
-                PaymentDate = payment.PaymentDate
+                Type = payment.Pix.Type.Id,
+                PixKey = payment.Pix.PixKey
             };
 
-            return DapperUtilsRepository<Payment>.Insert(Payment.POST, payment);
+            payment.Pix.Id = DapperUtilsRepository<Pix>.InsertWithScalar(Pix.POST, pix);
         }
-
-        if (technology.Equals("ado"))
+        else if (payment.BankSlip != null)
         {
-
-            using SqlConnection sqlConnection = new SqlConnection(_connectionString);
-
-            SqlCommand sqlCommand;
-
-            sqlConnection.Open();
-            if (payment.Card != null)
-            {
-                string insertCard = "INSERT INTO Card(CardNumber, SecurityCode, ExpirationDate, CardHolderName) VALUES(@CardNumber, @SecurityCode, @ExpirationDate, @CardHolderName);";
-
-                sqlCommand = new SqlCommand(insertCard, sqlConnection);
-                sqlCommand.Parameters.AddWithValue("@CardNumber", payment.Card.CardNumber);
-                sqlCommand.Parameters.AddWithValue("@SecurityCode", payment.Card.SecurityCode);
-                sqlCommand.Parameters.AddWithValue("@ExpirationDate", payment.Card.ExpirationDate);
-                sqlCommand.Parameters.AddWithValue("@CardHolderName", payment.Card.CardHolderName);
-                sqlCommand.ExecuteNonQuery();
-            }
-
-
-            if (payment.Pix != null)
-            {
-                string insertPixType = "INSERT INTO PixType(Name) VALUES(@Name); SELECT CAST(SCOPE_IDENTITY() AS INT);";
-                sqlCommand = new SqlCommand(insertPixType, sqlConnection);
-                sqlCommand.Parameters.AddWithValue("@Name", payment.Pix.Type.Name);
-                payment.Pix.Type.Id = (int)sqlCommand.ExecuteScalar();
-
-                string insertPix = "INSERT INTO Pix(Type, PixKey) VALUES(@Type, @PixKey); SELECT CAST(SCOPE_IDENTITY() AS INT);";
-
-                sqlCommand = new SqlCommand(insertPix, sqlConnection);
-                sqlCommand.Parameters.AddWithValue("@Type", payment.Pix.Type.Id);
-                sqlCommand.Parameters.AddWithValue("@PixKey", payment.Pix.PixKey);
-                payment.Pix.Id = (int)sqlCommand.ExecuteScalar();
-            }
-
-            if (payment.BankSlip != null)
-            {
-                string insertBankSlip = "INSERT INTO BankSlip(Number, DueDate) VALUES(@Number, @DueDate); SELECT CAST(SCOPE_IDENTITY() AS INT);";
-
-                sqlCommand = new SqlCommand(insertBankSlip, sqlConnection);
-                sqlCommand.Parameters.AddWithValue("@Number", payment.BankSlip.Number);
-                sqlCommand.Parameters.AddWithValue("@DueDate", payment.BankSlip.DueDate);
-                payment.BankSlip.Id = (int)sqlCommand.ExecuteScalar();
-            }
-
-            sqlCommand = new SqlCommand(Payment.POST, sqlConnection);
-            sqlCommand.Parameters.AddWithValue("@CardNumber", payment.Card?.CardNumber == null ? DBNull.Value : payment.Card.CardNumber);
-            sqlCommand.Parameters.AddWithValue("@BankSlipId", payment.BankSlip?.Id == null ? DBNull.Value : payment.BankSlip.Id);
-            sqlCommand.Parameters.AddWithValue("@PixId", payment.Pix?.Id == null ? DBNull.Value : payment.Pix.Id);
-            sqlCommand.Parameters.AddWithValue("@PaymentDate", payment.PaymentDate);
-            sqlCommand.ExecuteNonQuery();
-
-            return true;
+            payment.BankSlip.Id = DapperUtilsRepository<BankSlip>.InsertWithScalar(BankSlip.POST, payment.BankSlip);
         }
-        return false;
+        else if (payment.Card != null)
+        {
+            DapperUtilsRepository<Card>.Insert(Card.POST, payment.Card);
+        }
+
+        object obj = new
+        {
+            CardNumber = payment.Card?.CardNumber,
+            BankSlipId = payment.BankSlip?.Id,
+            PixId = payment.Pix?.Id,
+            PaymentDate = payment.PaymentDate
+        };
+
+        return DapperUtilsRepository<dynamic>.Insert(Payment.Post, obj);
     }
+
+    private bool InsertPaymentAdo(Payment payment)
+    {
+
+        if (payment.Card != null)
+        {
+            var list = new List<SqlParameter>();
+            list.Add(new("@CardNumber", payment.Card.CardNumber));
+            list.Add(new("@SecurityCode", payment.Card.SecurityCode));
+            list.Add(new("@ExpirationDate", payment.Card.ExpirationDate));
+            list.Add(new("@CardHolderName", payment.Card.CardHolderName));
+
+            _ = _adoUtils.ExecuteNonQuery(Card.POST, list).Result;
+        }
+
+        if (payment.Pix != null)
+        {
+            var pixTypeId = new List<SqlParameter>() { new("@Name", payment.Pix.Type.Name) };
+            payment.Pix.Type.Id = _adoUtils.ExecuteScalar(PixType.INSERT, pixTypeId).Result;
+
+            var pixParameters = new List<SqlParameter>()
+            {
+                new("@Type", payment.Pix.Type.Id),
+                new("@PixKey", payment.Pix.PixKey)
+            };
+
+            payment.Pix.Id = _adoUtils.ExecuteScalar(Pix.POST, pixParameters).Result;
+        }
+
+        if (payment.BankSlip != null)
+        {
+            var list = new List<SqlParameter>()
+            {
+                new("@Number", payment.BankSlip.Number),
+                new("@DueDate", payment.BankSlip.DueDate)
+            };
+
+            payment.BankSlip.Id = _adoUtils.ExecuteScalar(BankSlip.POST, list).Result;
+        }
+
+
+        var paymentParameters = new List<SqlParameter>()
+        {
+            new("@CardNumber", payment.Card == null ? DBNull.Value : payment.Card.CardNumber),
+            new("@BankSlipId", payment.BankSlip == null ? DBNull.Value :  payment.BankSlip?.Id ),
+            new("@PixId", payment.Pix == null ? DBNull.Value : payment.Pix.Id),
+            new("@PaymentDate", payment.PaymentDate)
+        };
+
+        return _adoUtils.ExecuteNonQuery(Payment.Post, paymentParameters).Result > 0;
+
+    }
+
+
+    // Get aux methods for
+    private Card? RetrieveCard(DataRow row)
+    {
+        if (row["CardNumber"] == DBNull.Value)
+            return null;
+
+        return new()
+        {
+            CardNumber = row["CardNumber"].ToString(),
+            SecurityCode = row["SecurityCode"].ToString(),
+            ExpirationDate = row["ExpirationDate"].ToString(),
+            CardHolderName = row["CardHolderName"].ToString()
+        };
+    }
+
+    private Pix? RetrievePix(DataRow row)
+    {
+        if (row["PixId"] == DBNull.Value)
+            return null;
+
+        return new Pix
+        {
+            Id = Convert.ToInt32(row["PixId"]),
+            PixKey = row["PixKey"].ToString(),
+            Type = new PixType
+            {
+                Id = Convert.ToInt32(row["PixTypeId"]),
+                Name = row["PixTypeName"].ToString()
+            }
+        };
+    }
+
+    private BankSlip? RetrieveBankSlip(DataRow row)
+    {
+        if (row["BankSlipId"] == DBNull.Value)
+            return null;
+
+        return new BankSlip
+        {
+            Id = Convert.ToInt32(row["BankSlipId"]),
+            Number = Convert.ToInt32(row["BankSlipNumber"]),
+            DueDate = Convert.ToDateTime(row["BankSlipDueDate"])
+        };
+    }
+
+    private Pix RetrievePix(dynamic row)
+    {
+        return new Pix()
+        {
+            Id = row.PixId,
+            PixKey = row.PixKey,
+            Type = new()
+            {
+                Id = row.PixTypeId,
+                Name = row.PixTypeName
+            }
+        };
+    }
+
 }

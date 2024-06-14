@@ -40,7 +40,6 @@ namespace AndreVehicles.CarAPI.Data
                 .WithMany()
                 .HasForeignKey("CustomerDocument");
             });
-
         }
 
         private void CreateCarsBuilder(ModelBuilder modelBuilder)
@@ -87,9 +86,6 @@ namespace AndreVehicles.CarAPI.Data
             {
                 entity.ToTable("Address");
                 entity.HasKey(a => a.Id);
-
-                entity.Property(a => a.Id)
-                    .UseIdentityColumn(seed: 1, increment: 1);
             });
 
             modelBuilder.Entity<Person>(entity =>
@@ -116,6 +112,12 @@ namespace AndreVehicles.CarAPI.Data
             {
                 entity.ToTable("Customer");
             });
+
+            modelBuilder.Entity<Dependent>(entity =>
+            {
+                entity.ToTable("Dependent");
+            });
+
         }
 
         private void CreateSalesBuilder(ModelBuilder modelBuilder)

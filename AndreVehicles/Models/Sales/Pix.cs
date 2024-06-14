@@ -4,6 +4,7 @@
 public class Pix
 {
     public readonly static string POST = "INSERT INTO Pix(Type, PixKey) VALUES(@Type, @PixKey); SELECT CAST(SCOPE_IDENTITY() AS INT);";
+
     public readonly static string GET = @"
     select 
         p.Id, 

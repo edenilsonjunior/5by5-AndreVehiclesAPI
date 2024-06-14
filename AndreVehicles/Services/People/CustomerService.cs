@@ -29,7 +29,7 @@ public class CustomerService
 
     public bool Post(string technology, Customer customer)
     {
-        customer.Address.Id = _addressRepository.Post(technology, customer.Address);
+         _addressRepository.Post(technology, customer.Address);
 
         return _customerRepository.Post(technology, customer);
     }

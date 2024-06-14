@@ -1,9 +1,15 @@
-﻿namespace Models.Sales;
+﻿using System.Net.NetworkInformation;
+
+namespace Models.Sales;
 
 
 public class Payment
 {
-    public readonly static string POST = "INSERT INTO Payment(CardNumber, BankSlipId, PixId, PaymentDate) VALUES(@CardNumber, @BankSlipId, @PixId, @PaymentDate);";
+    public readonly static string Post = "INSERT INTO Payment(CardNumber, BankSlipId, PixId, PaymentDate) VALUES(@CardNumber, @BankSlipId, @PixId, @PaymentDate);";
+    public readonly static string CardInsert = "INSERT INTO Payment(CardNumber, PaymentDate) VALUES(@CardNumber, @PaymentDate);";
+    public readonly static string PixInsert = "INSERT INTO Payment(PixId, PaymentDate) VALUES(@PixId, @PaymentDate);";
+    public readonly static string BankSlipInsert = "INSERT INTO Payment(BankSlipId, PaymentDate) VALUES(@BankSlipId, @PaymentDate);";
+
 
     public readonly static string GETALL = @"
     select  
