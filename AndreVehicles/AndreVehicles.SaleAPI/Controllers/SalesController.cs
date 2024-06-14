@@ -44,7 +44,7 @@ public class SalesController : ControllerBase
         {
             case "entity":
 
-                return  await _context.Sale
+                return await _context.Sale
                     .Include(c => c.Customer)
                     .Include(c => c.Customer.Address)
                     .Include(c => c.Employee)
@@ -101,6 +101,7 @@ public class SalesController : ControllerBase
         Customer? customer;
         Payment? payment;
 
+
         switch (technology)
         {
             case "entity":
@@ -132,8 +133,7 @@ public class SalesController : ControllerBase
                 };
 
 
-                var parameters = new[]
-                {
+                var parameters = new[] {
                     new SqlParameter("@CustomerDocument", sale.Customer.Document),
                     new SqlParameter("@EmployeeDocument", sale.Employee.Document),
                     new SqlParameter("@CarPlate", sale.Car.Plate),
@@ -152,10 +152,18 @@ public class SalesController : ControllerBase
 
             case "dapper" or "ado":
 
-                car = _carService.Get(technology, saleDTO.CarPlate);
-                employee = _employeeService.Get(technology, saleDTO.EmployeeDocument);
-                customer = _customerService.Get(technology, saleDTO.CustomerDocument);
-                payment = _paymentService.Get(technology, saleDTO.PaymentId);
+                var employeeT = ApiConsume<Employee>.Get("https://localhost:7296/api/Employees/", $"{technology}/{saleDTO.EmployeeDocument}");
+                var customerT = ApiConsume<Customer>.Get("https://localhost:7063/api/Customers/", $"{technology}/{saleDTO.CustomerDocument}");
+                var paymentT = ApiConsume<Payment>.Get("https://localhost:7255/api/Payments/", $"{technology}/{saleDTO.PaymentId}");
+                var carT = ApiConsume<Car>.Get("https://localhost:7274/api/Cars/", $"{technology}/{saleDTO.CarPlate}");
+
+                Task.WaitAll(employeeT, customerT, paymentT, carT);
+
+                employee = employeeT.Result;
+                customer = customerT.Result;
+                payment = paymentT.Result;
+                car = carT.Result;
+
 
                 if (car == null || employee == null || customer == null || payment == null)
                     return BadRequest("Invalid car, employee, customer or payment.");
