@@ -15,7 +15,7 @@ namespace AndreVehicles.FinancialPendingAPI.Data
         {
         }
 
-        public DbSet<Models.Financials.FinancialPending> FinancialPendings { get; set; } = default!;
+        public DbSet<Models.Financials.FinancialPending> FinancialPending { get; set; } = default!;
         public DbSet<Models.People.Customer> Customer { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

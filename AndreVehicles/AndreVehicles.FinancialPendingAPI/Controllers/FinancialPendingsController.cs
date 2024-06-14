@@ -31,22 +31,28 @@ namespace AndreVehicles.FinancialPendingAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FinancialPending>>> GetFinancialPending()
         {
-          if (_context.FinancialPendings == null)
-          {
-              return NotFound();
-          }
-            return await _context.FinancialPendings.ToListAsync();
+            if (_context.FinancialPending == null)
+            {
+                return NotFound();
+            }
+            return await _context.FinancialPending
+                .Include(f => f.Customer)
+                .Include(f => f.Customer.Address)
+                .ToListAsync();
         }
 
         // GET: api/FinancialPendings/5
         [HttpGet("{id}")]
         public async Task<ActionResult<FinancialPending>> GetFinancialPending(int id)
         {
-          if (_context.FinancialPendings == null)
-          {
-              return NotFound();
-          }
-            var financialPending = await _context.FinancialPendings.FindAsync(id);
+            if (_context.FinancialPending == null)
+            {
+                return NotFound();
+            }
+            var financialPending = await _context.FinancialPending
+                                .Include(f => f.Customer)
+                                .Include(f => f.Customer.Address)
+                                .FirstOrDefaultAsync(f => f.Id == id);
 
             if (financialPending == null)
             {
@@ -72,17 +78,17 @@ namespace AndreVehicles.FinancialPendingAPI.Controllers
             FinancialPending financialPending = new()
             {
                 Description = financialPendingDTO.Description,
-                Customer =  customer,
+                Customer = customer,
                 Price = financialPendingDTO.Price,
                 FinancialPendingDate = financialPendingDTO.FinancialPendingDate,
                 PaymentDate = financialPendingDTO.PaymentDate,
                 Status = financialPendingDTO.Status
             };
 
-            if (_context.FinancialPendings == null)
-              {
-                  return Problem("Entity set 'AndreVehiclesFinancialPendingAPIContext.FinancialPending'  is null.");
-              }
+            if (_context.FinancialPending == null)
+            {
+                return Problem("Entity set 'AndreVehiclesFinancialPendingAPIContext.FinancialPending'  is null.");
+            }
 
             var parameters = new[]
             {
@@ -96,7 +102,7 @@ namespace AndreVehicles.FinancialPendingAPI.Controllers
 
             int sucess = await _context.Database.ExecuteSqlRawAsync(FinancialPending.POST, parameters);
 
-            if(sucess > 0)
+            if (sucess > 0)
             {
                 return CreatedAtAction("GetFinancialPending", new { id = financialPending.Id }, financialPending);
             }
@@ -118,7 +124,7 @@ namespace AndreVehicles.FinancialPendingAPI.Controllers
                 HttpResponseMessage response = await client.GetAsync($"entity/{document}");
 
                 response.EnsureSuccessStatusCode();
-                customer =  await response.Content.ReadFromJsonAsync<Customer>();
+                customer = await response.Content.ReadFromJsonAsync<Customer>();
             }
             catch (Exception)
             {
