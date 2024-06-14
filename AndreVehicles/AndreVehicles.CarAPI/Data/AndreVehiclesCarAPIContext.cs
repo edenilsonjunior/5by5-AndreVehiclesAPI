@@ -71,9 +71,6 @@ namespace AndreVehicles.CarAPI.Data
             {
                 entity.ToTable("Address");
                 entity.HasKey(a => a.Id);
-
-                entity.Property(a => a.Id)
-                    .UseIdentityColumn(seed: 1, increment: 1);
             });
 
             modelBuilder.Entity<Person>(entity =>

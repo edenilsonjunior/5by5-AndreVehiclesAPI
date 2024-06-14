@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AndreVehicles.CarAPI.Migrations
 {
     [DbContext(typeof(AndreVehiclesCarAPIContext))]
-    [Migration("20240610203515_v1")]
-    partial class v1
+    [Migration("20240613211752_v2")]
+    partial class v2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -122,11 +122,8 @@ namespace AndreVehicles.CarAPI.Migrations
 
             modelBuilder.Entity("Models.People.Address", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AdditionalInfo")
                         .IsRequired()
@@ -169,8 +166,9 @@ namespace AndreVehicles.CarAPI.Migrations
                     b.Property<string>("Document")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("AddressId")
-                        .HasColumnType("int");
+                    b.Property<string>("AddressId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");

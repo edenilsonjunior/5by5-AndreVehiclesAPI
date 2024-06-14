@@ -29,7 +29,7 @@ public class EmployeeService
 
     public bool Post(string technology, Employee employee)
     {
-        employee.Address.Id = _addressRepository.Post(technology, employee.Address);
+        _addressRepository.Post(technology, employee.Address);
         return _employeeRepository.Post(technology, employee);
     }
 }

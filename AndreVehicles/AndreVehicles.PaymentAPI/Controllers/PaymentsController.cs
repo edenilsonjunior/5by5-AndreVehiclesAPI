@@ -14,10 +14,14 @@ public class PaymentsController : ControllerBase
     private readonly AndreVehiclesPaymentAPIContext _context;
     private readonly PaymentService _service;
 
+    private readonly string InvalidTechnology;
+
     public PaymentsController(AndreVehiclesPaymentAPIContext context)
     {
         _context = context;
         _service = new PaymentService();
+
+        InvalidTechnology = "Invalid technology. Valid values are: entity, dapper, ado";
     }
 
 
@@ -36,14 +40,12 @@ public class PaymentsController : ControllerBase
                     .Include(b => b.BankSlip)
                     .Include(c => c.Card)
                     .ToListAsync();
-
             case "dapper":
             case "ado":
                 var payments = _service.Get(technology);
                 return payments == null || payments.Count == 0 ? NotFound() : payments;
-
             default:
-                return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");
+                return BadRequest(InvalidTechnology);
         }
     }
 
@@ -52,13 +54,19 @@ public class PaymentsController : ControllerBase
     public async Task<ActionResult<Payment>> GetPayment(string technology, int id)
     {
         Payment? payment;
+
         switch (technology)
         {
             case "entity":
-                if (_context.Payment == null)
-                    return NotFound();
+                if (_context.Payment == null) return NotFound();
 
-                payment = await _context.Payment.Include(p => p.Pix).Include(p => p.Pix.Type).Include(b => b.BankSlip).Include(c => c.Card).SingleOrDefaultAsync(p => p.Id == id);
+                payment = await _context.Payment
+                    .Include(p => p.Pix)
+                    .Include(p => p.Pix.Type)
+                    .Include(b => b.BankSlip)
+                    .Include(c => c.Card)
+                    .SingleOrDefaultAsync(p => p.Id == id);
+
                 return payment != null ? payment : NotFound();
 
             case "dapper":
@@ -67,9 +75,10 @@ public class PaymentsController : ControllerBase
                 return payment != null ? payment : NotFound();
 
             default:
-                return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");
+                return BadRequest(InvalidTechnology);
         }
     }
+
 
 
 
@@ -79,39 +88,11 @@ public class PaymentsController : ControllerBase
     {
         Payment payment = new()
         {
-            Id = paymentDTO.Id,
             PaymentDate = paymentDTO.PaymentDate,
-            Pix = new()
-            {
-                Id = paymentDTO.Id,
-                PixKey = paymentDTO.PixKey,
-                Type = new()
-                {
-                    Name = paymentDTO.PixTypeName
-                }
-            }
+            Pix = paymentDTO.Pix
         };
 
-        switch (technology)
-        {
-            case "entity":
-                if (_context.Payment == null)
-                    return NotFound();
-
-                _context.Payment.Add(payment);
-                await _context.SaveChangesAsync();
-
-                return CreatedAtAction("GetPayment", new { technology, id = payment.Id }, payment);
-
-            case "dapper":
-            case "ado":
-                bool success = _service.Post(technology, payment);
-
-                return success ? CreatedAtAction("GetPayment", new { technology, id = payment.Id }, payment) : BadRequest();
-
-            default:
-                return BadRequest();
-        }
+        return await ReturnByTechnology(technology, payment);
     }
 
 
@@ -120,36 +101,12 @@ public class PaymentsController : ControllerBase
     {
         Payment payment = new()
         {
-            Id = bankSlipPaymentDTO.Id,
-            PaymentDate = bankSlipPaymentDTO.DueDate,
-            BankSlip = new()
-            {
-                Number = bankSlipPaymentDTO.Number,
-                DueDate = bankSlipPaymentDTO.DueDate
-            }
+            PaymentDate = bankSlipPaymentDTO.PaymentDate,
+            BankSlip = bankSlipPaymentDTO.BankSlip
         };
 
-        switch (technology)
-        {
-            case "entity":
-                if (_context.Payment == null)
-                    return NotFound();
-
-                _context.Payment.Add(payment);
-                await _context.SaveChangesAsync();
-
-                return CreatedAtAction("GetPayment", new { technology, id = payment.Id }, payment);
-
-            case "dapper":
-            case "ado":
-                bool success = _service.Post(technology, payment);
-
-                return success ? CreatedAtAction("GetPayment", new { technology, id = payment.Id }, payment) : BadRequest();
-            default:
-                return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");
-        }
+        return await ReturnByTechnology(technology, payment);
     }
-
 
 
     [HttpPost("card/{technology}")]
@@ -157,96 +114,49 @@ public class PaymentsController : ControllerBase
     {
         Payment payment = new()
         {
-            Id = cardPaymentDTO.Id,
             PaymentDate = cardPaymentDTO.PaymentDate,
-            Card = new()
-            {
-                CardNumber = cardPaymentDTO.CardNumber,
-                ExpirationDate = cardPaymentDTO.ExpirationDate,
-                SecurityCode = cardPaymentDTO.SecurityCode,
-                CardHolderName = cardPaymentDTO.CardHolderName
-            }
+            Card = cardPaymentDTO.Card
         };
 
-        switch (technology)
-        {
-            case "entity":
-                if (_context.Payment == null)
-                    return NotFound();
-
-                _context.Payment.Add(payment);
-                await _context.SaveChangesAsync();
-
-                return CreatedAtAction("GetPayment", new { technology, id = payment.Id }, payment);
-
-            case "dapper":
-            case "ado":
-                bool success = _service.Post(technology, payment);
-
-                return success ? CreatedAtAction("GetPayment", new { technology, id = payment.Id }, payment) : BadRequest();
-
-            default:
-                return BadRequest("Invalid technology. Valid values are: entity, dapper, ado");
-        }
-
+        return await ReturnByTechnology(technology, payment);
     }
 
 
 
-    /*
-    [HttpPut("{id}")]  // PUT: api/Payments/5
-    public async Task<IActionResult> PutPayment(int id, Payment payment)
+
+
+
+
+    private async Task<ActionResult<Payment>> ReturnByTechnology(string technology, Payment payment)
     {
-        if (id != payment.Id)
+        return technology switch
         {
-            return BadRequest();
-        }
-
-        _context.Entry(payment).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!PaymentExists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        return NoContent();
+            "entity" => await PostWithEntity(payment),
+            "dapper" or "ado" => PostWithDapperOrAdo(technology, payment),
+            _ => BadRequest(InvalidTechnology),
+        };
     }
 
 
-    // DELETE: api/Payments/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePayment(int id)
+    private async Task<ActionResult<Payment>> PostWithEntity(Payment payment)
     {
         if (_context.Payment == null)
-        {
             return NotFound();
-        }
-        var payment = await _context.Payment.FindAsync(id);
-        if (payment == null)
-        {
-            return NotFound();
-        }
 
-        _context.Payment.Remove(payment);
+        _context.Payment.Add(payment);
         await _context.SaveChangesAsync();
 
-        return NoContent();
+        return CreatedAtAction("GetPayment", new { technology = "entity", id = payment.Id }, payment);
     }
-    */
 
-    private bool PaymentExists(int id)
+
+    private ActionResult<Payment> PostWithDapperOrAdo(string technology, Payment payment)
     {
-        return (_context.Payment?.Any(e => e.Id == id)).GetValueOrDefault();
+        bool success = _service.Post(technology, payment);
+
+        if (success)
+            return CreatedAtAction("GetPayment", new { technology, id = payment.Id }, payment);
+        else
+            return BadRequest($"Can't create Payment with technology ({technology})!");
     }
 }

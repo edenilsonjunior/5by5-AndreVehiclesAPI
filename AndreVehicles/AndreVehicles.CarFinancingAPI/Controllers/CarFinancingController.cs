@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Models.Cars;
+﻿using Microsoft.AspNetCore.Mvc;
 using Models.DTO.Financials;
 using Models.Financials;
 using Models.Sales;
@@ -19,6 +17,8 @@ public class CarFinancingController : ControllerBase
         _carFinancingService = new();
     }
 
+
+
     [HttpGet]
     public ActionResult<IEnumerable<CarFinancing>> Get()
     {
@@ -26,6 +26,8 @@ public class CarFinancingController : ControllerBase
 
         return list != null ? Ok(list) : NotFound();
     }
+
+
 
     [HttpGet("{id}", Name = "GetCarFinancing")]
     public ActionResult<CarFinancing> Get(int id)
@@ -35,24 +37,23 @@ public class CarFinancingController : ControllerBase
         return carFinancing != null ? Ok(carFinancing) : NotFound();
     }
 
+
+
     [HttpPost]
     public ActionResult Post(CarFinancingDTO carFinancingDTO)
     {
-        Sale? sale = GetSaleById(carFinancingDTO.SaleId).Result;
+        Task<Sale?> sale = GetSaleById(carFinancingDTO.SaleId);
+        Task<Bank?> bank = GetBankByCnpj(carFinancingDTO.BankCnpj);
 
-        Bank? bank = GetBankByCnpj(carFinancingDTO.BankCnpj).Result;
+        Task.WaitAll(sale, bank);
 
-        if (sale == null)
-            return NotFound("Can't find Sale!");
-
-        if (bank == null)
-            return NotFound("Can't find Bank!");
-
+        if (sale.Result == null) return NotFound("Can't find Sale!");
+        if (bank.Result == null) return NotFound("Can't find Bank!");
 
         CarFinancing carFinancing = new()
         {
-            Sale = sale,
-            Bank = bank,
+            Sale = sale.Result,
+            Bank = bank.Result,
             FinancingDate = carFinancingDTO.FinancingDate
         };
 

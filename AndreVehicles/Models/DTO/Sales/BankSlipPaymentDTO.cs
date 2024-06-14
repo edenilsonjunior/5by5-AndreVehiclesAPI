@@ -1,8 +1,10 @@
-﻿namespace Models.DTO.Sales;
+﻿using Models.Sales;
+
+namespace Models.DTO.Sales;
 
 public class BankSlipPaymentDTO
 {
-    public int Id { get; set; }
-    public int Number { get; set; }
-    public DateTime DueDate { get; set; }
+    public DateTime PaymentDate { get; set; }
+    public BankSlip BankSlip { get; set; }
+
 }

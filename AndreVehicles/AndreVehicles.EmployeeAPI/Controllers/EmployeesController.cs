@@ -118,7 +118,9 @@ public class EmployeesController : ControllerBase
             }
         };
 
-        if (new AddressService().PostMongo(address) == null)
+        address = new AddressService().PostMongo(address);
+
+        if (address == null)
             return BadRequest("Failed to save address in MongoDB.");
 
 
