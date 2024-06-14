@@ -35,9 +35,8 @@ internal class Program
                         var returnMessage = Encoding.UTF8.GetString(body);
                         var bank = JsonConvert.DeserializeObject<Bank>(returnMessage);
 
-
-                        string uriMongoApi = "";
-                        string uriSqlApi = "";
+                        string uriMongoApi = "https://localhost:7015";
+                        string uriSqlApi = "https://localhost:7226";
 
                         Task<Bank> taskMongo = bankService.Post(uriMongoApi, bank);
                         Task<Bank> taskSQL = bankService.Post(uriSqlApi,bank);

@@ -45,6 +45,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndreVehicles.InsuranceAPI"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndreVehicles.BankConsumer", "AndreVehicles.BankConsumer\AndreVehicles.BankConsumer.csproj", "{BC1C4ACC-4EA2-4801-BAE3-65B001AEDFB7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndreVehicles.BankSql", "AndreVehicles.BankSql\AndreVehicles.BankSql.csproj", "{42F3C98A-DE96-4E54-97D8-D63296EE70E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndreVehicles.BankMongo", "AndreVehicles.BankMongo\AndreVehicles.BankMongo.csproj", "{397BE0C5-1085-404D-A8D8-E82D9DC6E77D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -135,6 +139,14 @@ Global
 		{BC1C4ACC-4EA2-4801-BAE3-65B001AEDFB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC1C4ACC-4EA2-4801-BAE3-65B001AEDFB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC1C4ACC-4EA2-4801-BAE3-65B001AEDFB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42F3C98A-DE96-4E54-97D8-D63296EE70E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42F3C98A-DE96-4E54-97D8-D63296EE70E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42F3C98A-DE96-4E54-97D8-D63296EE70E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42F3C98A-DE96-4E54-97D8-D63296EE70E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{397BE0C5-1085-404D-A8D8-E82D9DC6E77D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{397BE0C5-1085-404D-A8D8-E82D9DC6E77D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{397BE0C5-1085-404D-A8D8-E82D9DC6E77D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{397BE0C5-1085-404D-A8D8-E82D9DC6E77D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
