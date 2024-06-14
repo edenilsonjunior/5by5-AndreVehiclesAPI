@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AndreVehicles.CarAPI.Migrations
 {
     [DbContext(typeof(AndreVehiclesCarAPIContext))]
-    [Migration("20240614123729_v1")]
+    [Migration("20240614133521_v1")]
     partial class v1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -153,6 +153,57 @@ namespace AndreVehicles.CarAPI.Migrations
                     b.HasIndex("CustomerDocument");
 
                     b.ToTable("FinancialPending", (string)null);
+                });
+
+            modelBuilder.Entity("Models.Insurances.DriversLicense", b =>
+                {
+                    b.Property<long>("License")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("CategoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Cpf")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FatherName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MotherName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Rg")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("License");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("DriversLicense", (string)null);
+                });
+
+            modelBuilder.Entity("Models.Insurances.DriversLicenseCategory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DriversLicenseCategory");
                 });
 
             modelBuilder.Entity("Models.People.Address", b =>
@@ -397,6 +448,18 @@ namespace AndreVehicles.CarAPI.Migrations
                     b.ToTable("Sale", (string)null);
                 });
 
+            modelBuilder.Entity("Models.Insurances.Driver", b =>
+                {
+                    b.HasBaseType("Models.People.Person");
+
+                    b.Property<long>("License1")
+                        .HasColumnType("bigint");
+
+                    b.HasIndex("License1");
+
+                    b.ToTable("Driver", (string)null);
+                });
+
             modelBuilder.Entity("Models.People.Customer", b =>
                 {
                     b.HasBaseType("Models.People.Person");
@@ -479,6 +542,17 @@ namespace AndreVehicles.CarAPI.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("Models.Insurances.DriversLicense", b =>
+                {
+                    b.HasOne("Models.Insurances.DriversLicenseCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("Models.People.Person", b =>
                 {
                     b.HasOne("Models.People.Address", "Address")
@@ -555,6 +629,23 @@ namespace AndreVehicles.CarAPI.Migrations
                     b.Navigation("Employee");
 
                     b.Navigation("Payment");
+                });
+
+            modelBuilder.Entity("Models.Insurances.Driver", b =>
+                {
+                    b.HasOne("Models.People.Person", null)
+                        .WithOne()
+                        .HasForeignKey("Models.Insurances.Driver", "Document")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.HasOne("Models.Insurances.DriversLicense", "License")
+                        .WithMany()
+                        .HasForeignKey("License1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("License");
                 });
 
             modelBuilder.Entity("Models.People.Customer", b =>
